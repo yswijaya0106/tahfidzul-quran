@@ -26,7 +26,7 @@ class _AssessmentCreateScreenState
 
   DateTime _assessmentDate = DateTime.now();
   AssessmentType _assessmentType = AssessmentType.newMemorization;
-  AssessmentGrade _grade = AssessmentGrade.jayyid;
+  Grade _grade = Grade.jayyid;
   int? _startSurah;
   int? _startVerse;
   int? _endSurah;
@@ -171,10 +171,10 @@ class _AssessmentCreateScreenState
               onVerseChanged: (value) => setState(() => _endVerse = value),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<AssessmentGrade>(
+            DropdownButtonFormField<Grade>(
               initialValue: _grade,
               decoration: const InputDecoration(labelText: 'Grade'),
-              items: AssessmentGrade.values
+              items: Grade.values
                   .map(
                     (g) => DropdownMenuItem(
                       value: g,

@@ -27,7 +27,7 @@ class AssessmentRepository {
     required int startVerseNumber,
     required int endSurahNumber,
     required int endVerseNumber,
-    required AssessmentGrade grade,
+    required Grade grade,
     String? notes,
   }) async {
     final response = await _apiClient.post(

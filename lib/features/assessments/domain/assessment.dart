@@ -1,6 +1,8 @@
-enum AssessmentType { newMemorization, murojaah }
+import 'grade.dart';
 
-enum AssessmentGrade { mumtaz, jayyidJiddan, jayyid, needsReview }
+export 'grade.dart';
+
+enum AssessmentType { newMemorization, murojaah }
 
 AssessmentType assessmentTypeFromApi(String value) =>
     value == 'NEW_MEMORIZATION'
@@ -13,44 +15,15 @@ String assessmentTypeToApi(AssessmentType type) =>
 String assessmentTypeLabel(AssessmentType type) =>
     type == AssessmentType.newMemorization ? 'New memorization' : 'Murojaah';
 
-AssessmentGrade assessmentGradeFromApi(String value) {
-  switch (value) {
-    case 'MUMTAZ':
-      return AssessmentGrade.mumtaz;
-    case 'JAYYID_JIDDAN':
-      return AssessmentGrade.jayyidJiddan;
-    case 'JAYYID':
-      return AssessmentGrade.jayyid;
-    default:
-      return AssessmentGrade.needsReview;
-  }
-}
+/// @deprecated use [gradeFromApi] from grade.dart instead; kept as an alias
+/// during the transition.
+Grade assessmentGradeFromApi(String value) => gradeFromApi(value);
 
-String assessmentGradeToApi(AssessmentGrade grade) {
-  switch (grade) {
-    case AssessmentGrade.mumtaz:
-      return 'MUMTAZ';
-    case AssessmentGrade.jayyidJiddan:
-      return 'JAYYID_JIDDAN';
-    case AssessmentGrade.jayyid:
-      return 'JAYYID';
-    case AssessmentGrade.needsReview:
-      return 'NEEDS_REVIEW';
-  }
-}
+/// @deprecated use [gradeToApi] from grade.dart instead.
+String assessmentGradeToApi(Grade grade) => gradeToApi(grade);
 
-String assessmentGradeLabel(AssessmentGrade grade) {
-  switch (grade) {
-    case AssessmentGrade.mumtaz:
-      return 'Mumtaz';
-    case AssessmentGrade.jayyidJiddan:
-      return 'Jayyid Jiddan';
-    case AssessmentGrade.jayyid:
-      return 'Jayyid';
-    case AssessmentGrade.needsReview:
-      return 'Needs review';
-  }
-}
+/// @deprecated use [gradeLabel] from grade.dart instead.
+String assessmentGradeLabel(Grade grade) => gradeLabel(grade);
 
 class MemorizationAssessment {
   final String id;
@@ -62,7 +35,7 @@ class MemorizationAssessment {
   final int startVerseNumber;
   final int endSurahNumber;
   final int endVerseNumber;
-  final AssessmentGrade grade;
+  final Grade grade;
   final String? notes;
 
   const MemorizationAssessment({
@@ -90,7 +63,7 @@ class MemorizationAssessment {
         startVerseNumber: json['startVerseNumber'] as int,
         endSurahNumber: json['endSurahNumber'] as int,
         endVerseNumber: json['endVerseNumber'] as int,
-        grade: assessmentGradeFromApi(json['grade'] as String),
+        grade: gradeFromApi(json['grade'] as String),
         notes: json['notes'] as String?,
       );
 }
