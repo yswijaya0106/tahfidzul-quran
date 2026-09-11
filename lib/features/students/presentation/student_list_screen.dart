@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/async_value_view.dart';
+import '../../locations/application/location_providers.dart';
 import '../application/student_providers.dart';
 import '../domain/student.dart';
 
 class StudentListScreen extends ConsumerStatefulWidget {
-  final String locationId;
-
-  const StudentListScreen({super.key, required this.locationId});
+  const StudentListScreen({super.key});
 
   @override
   ConsumerState<StudentListScreen> createState() => _StudentListScreenState();
@@ -27,17 +26,18 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final params = StudentListParams(
-      locationId: widget.locationId,
-      name: _searchTerm,
-    );
+    final locationId = ref.watch(selectedLocationIdProvider);
+    if (locationId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final params = StudentListParams(locationId: locationId, name: _searchTerm);
     final students = ref.watch(studentListProvider(params));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Students')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () =>
-            context.push('/locations/${widget.locationId}/students/new'),
+        onPressed: () => context.push('/students/new'),
         icon: const Icon(Icons.add),
         label: const Text('Add student'),
       ),
@@ -67,10 +67,8 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: result.data.length,
                   separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) => _StudentTile(
-                    student: result.data[index],
-                    locationId: widget.locationId,
-                  ),
+                  itemBuilder: (context, index) =>
+                      _StudentTile(student: result.data[index]),
                 ),
               ),
             ),
@@ -83,9 +81,8 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
 
 class _StudentTile extends StatelessWidget {
   final Student student;
-  final String locationId;
 
-  const _StudentTile({required this.student, required this.locationId});
+  const _StudentTile({required this.student});
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +91,7 @@ class _StudentTile extends StatelessWidget {
       title: Text(student.fullName),
       subtitle: Text(student.studentCode),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () =>
-          context.push('/locations/$locationId/students/${student.id}'),
+      onTap: () => context.push('/students/${student.id}'),
     );
   }
 }

@@ -3,12 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../locations/application/location_providers.dart';
 import '../application/student_providers.dart';
 
 class StudentCreateScreen extends ConsumerStatefulWidget {
-  final String locationId;
-
-  const StudentCreateScreen({super.key, required this.locationId});
+  const StudentCreateScreen({super.key});
 
   @override
   ConsumerState<StudentCreateScreen> createState() =>
@@ -42,13 +41,16 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
     setState(() => _serverFieldErrors = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final locationId = ref.read(selectedLocationIdProvider);
+    if (locationId == null) return;
+
     setState(() => _submitting = true);
     try {
       final student = await ref
           .read(studentRepositoryProvider)
           .create(
             fullName: _fullNameController.text.trim(),
-            locationId: widget.locationId,
+            locationId: locationId,
             nik: _nikController.text.trim().isEmpty
                 ? null
                 : _nikController.text.trim(),
@@ -67,9 +69,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
           );
 
       if (mounted) {
-        context.replace(
-          '/locations/${widget.locationId}/students/${student.id}',
-        );
+        context.replace('/students/${student.id}');
       }
     } on AppException catch (error) {
       setState(() => _serverFieldErrors = error.fields);

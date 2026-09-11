@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../auth/application/auth_controller.dart';
+import '../../auth/domain/user.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -21,6 +22,15 @@ class SettingsScreen extends ConsumerWidget {
               title: Text(user.fullName),
               subtitle: Text(user.email ?? user.phone ?? ''),
             ),
+          if (user?.role == UserRole.admin) ...[
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.manage_accounts_outlined),
+              title: const Text('Manage users'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/users'),
+            ),
+          ],
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),

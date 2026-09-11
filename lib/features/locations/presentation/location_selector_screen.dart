@@ -67,7 +67,7 @@ class _LocationTile extends ConsumerWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           ref.read(selectedLocationIdProvider.notifier).state = location.id;
-          context.go('/locations/${location.id}/dashboard');
+          context.go('/dashboard');
         },
       ),
     );

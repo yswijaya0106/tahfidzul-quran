@@ -3,12 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../locations/application/location_providers.dart';
 import '../application/activity_providers.dart';
 
 class ActivityCreateScreen extends ConsumerStatefulWidget {
-  final String locationId;
-
-  const ActivityCreateScreen({super.key, required this.locationId});
+  const ActivityCreateScreen({super.key});
 
   @override
   ConsumerState<ActivityCreateScreen> createState() =>
@@ -41,18 +40,22 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final locationId = ref.read(selectedLocationIdProvider);
+    if (locationId == null) return;
+
     setState(() => _submitting = true);
 
     try {
       await ref
           .read(activityRepositoryProvider)
           .create(
-            locationId: widget.locationId,
+            locationId: locationId,
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
             activityDate: _activityDate,
           );
-      ref.invalidate(activityListProvider(widget.locationId));
+      ref.invalidate(activityListProvider(locationId));
       if (mounted) context.pop();
     } on AppException catch (error) {
       if (mounted) {

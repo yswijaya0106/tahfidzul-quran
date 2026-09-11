@@ -3,22 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/async_value_view.dart';
+import '../../locations/application/location_providers.dart';
 import '../application/activity_providers.dart';
 import '../domain/activity.dart';
 
 class ActivityListScreen extends ConsumerWidget {
-  final String locationId;
-
-  const ActivityListScreen({super.key, required this.locationId});
+  const ActivityListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locationId = ref.watch(selectedLocationIdProvider);
+    if (locationId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     final activities = ref.watch(activityListProvider(locationId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Activities')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/locations/$locationId/activities/new'),
+        onPressed: () => context.push('/activities/new'),
         icon: const Icon(Icons.add_a_photo_outlined),
         label: const Text('New activity'),
       ),
