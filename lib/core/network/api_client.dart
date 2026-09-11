@@ -12,11 +12,13 @@ import 'app_config.dart';
 /// "Widgets must not call HTTP clients or SQL directly").
 class ApiClient {
   final Dio _dio;
+  final Dio _uploadDio;
   final SecureTokenStorage _tokenStorage;
   Completer<bool>? _refreshInFlight;
 
   ApiClient({Dio? dio, SecureTokenStorage? tokenStorage})
     : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      _uploadDio = Dio(),
       _tokenStorage = tokenStorage ?? SecureTokenStorage() {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -112,6 +114,33 @@ class ApiClient {
 
   Future<void> delete(String path) async {
     await _unwrapVoid(() => _dio.delete(path));
+  }
+
+  /// Uploads raw bytes to a presigned storage URL (S3-compatible). Uses a
+  /// bare Dio instance with no base URL and no auth interceptor: the
+  /// presigned URL carries its own signature/expiry, and our app's access
+  /// token has no business being sent to the storage provider.
+  Future<void> uploadBytes(
+    String presignedUrl,
+    List<int> bytes, {
+    required String mimeType,
+    void Function(int sent, int total)? onProgress,
+  }) async {
+    try {
+      await _uploadDio.put(
+        presignedUrl,
+        data: Stream.fromIterable([bytes]),
+        options: Options(
+          headers: {
+            Headers.contentTypeHeader: mimeType,
+            Headers.contentLengthHeader: bytes.length,
+          },
+        ),
+        onSendProgress: onProgress,
+      );
+    } on DioException catch (error) {
+      throw _mapError(error);
+    }
   }
 
   Future<Map<String, dynamic>> _unwrap(

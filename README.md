@@ -52,11 +52,28 @@ implementations built on `core/network/ApiClient`.
 Loading, empty, error (with retry), offline, and unauthorized states via
 `core/widgets/AsyncValueView`, per CLAUDE.md's Flutter conventions.
 
+## Photo uploads
+
+The activity form supports picking multiple photos, each one:
+
+1. Compressed client-side to ~500KB / max 1280px longest edge
+   (`core/media/image_compressor.dart`, pure Dart via the `image` package —
+   no native platform config needed), before any network call.
+2. Uploaded with the presign -> direct PUT -> complete flow from the
+   backend's Postman collection (`features/files/data/file_repository.dart`),
+   with a per-photo progress indicator.
+3. Attached to the activity as `{objectKey, mimeType, sizeBytes, caption,
+   displayOrder}` on create.
+
+Bytes go straight from the device to the storage provider via the
+presigned URL — never through base64, and never through our own backend
+process — matching CLAUDE.md's "never binary files in database rows" and
+the spec's private/expiring-URL requirement.
+
 ## Known scope limitations in this build
 
-- Photo upload (student documents, activity photos) is not wired to the
-  backend's presign/complete flow yet; the activity form currently submits
-  with an empty photo list and shows a placeholder note.
+- Student document photos (profile/ID card/graduation certificate) don't
+  use the upload flow yet — only activity photos do so far.
 - The admin user-management screen covers list + deactivate; create and
   location-assignment forms are a follow-up increment.
 - No offline cache/persistence layer yet beyond Riverpod's in-memory

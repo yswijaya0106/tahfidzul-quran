@@ -1,6 +1,7 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/pagination/page_result.dart';
 import '../domain/activity.dart';
+import '../domain/activity_photo_input.dart';
 
 class ActivityRepository {
   final ApiClient _apiClient;
@@ -24,6 +25,7 @@ class ActivityRepository {
     required String title,
     String? description,
     required DateTime activityDate,
+    List<ActivityPhotoInput> photos = const [],
   }) async {
     final response = await _apiClient.post(
       '/locations/$locationId/activities',
@@ -32,7 +34,7 @@ class ActivityRepository {
         if (description != null && description.isNotEmpty)
           'description': description,
         'activityDate': activityDate.toUtc().toIso8601String(),
-        'photos': [],
+        'photos': photos.map((photo) => photo.toJson()).toList(),
       },
     );
     return Activity.fromJson(response['data'] as Map<String, dynamic>);
