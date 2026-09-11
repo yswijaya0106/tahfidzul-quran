@@ -8,6 +8,6 @@ class DashboardRepository {
 
   Future<LocationDashboard> getLocationDashboard(String locationId) async {
     final response = await _apiClient.get('/dashboard/locations/$locationId');
-    return LocationDashboard.fromJson(response);
+    return LocationDashboard.fromJson(response['data'] as Map<String, dynamic>);
   }
 }
