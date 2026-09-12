@@ -12,17 +12,25 @@ class HomeShell extends StatelessWidget {
 
   const HomeShell({super.key, required this.shell});
 
-  static const _labels = ['Beranda', 'Siswa', 'Aktivitas', 'Pengaturan'];
+  static const _labels = [
+    'Beranda',
+    'Siswa',
+    'Aktivitas',
+    'Angkatan',
+    'Pengaturan',
+  ];
   static const _icons = [
     Icons.home_outlined,
     Icons.groups_outlined,
     Icons.photo_library_outlined,
+    Icons.groups_2_outlined,
     Icons.settings_outlined,
   ];
   static const _selectedIcons = [
     Icons.home_rounded,
     Icons.groups_rounded,
     Icons.photo_library_rounded,
+    Icons.groups_2_rounded,
     Icons.settings_rounded,
   ];
 

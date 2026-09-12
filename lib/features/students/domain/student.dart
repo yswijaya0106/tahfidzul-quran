@@ -8,6 +8,7 @@ class Student {
   final String studentCode;
   final String fullName;
   final String locationId;
+  final String? angkatanId;
   final String? nikMasked;
   final String? guardianName;
   final String? address;
@@ -20,6 +21,7 @@ class Student {
     required this.studentCode,
     required this.fullName,
     required this.locationId,
+    required this.angkatanId,
     required this.nikMasked,
     required this.guardianName,
     required this.address,
@@ -33,6 +35,7 @@ class Student {
     studentCode: json['studentCode'] as String,
     fullName: json['fullName'] as String,
     locationId: json['locationId'] as String,
+    angkatanId: json['angkatanId'] as String?,
     nikMasked: json['nikMasked'] as String?,
     guardianName: json['guardianName'] as String?,
     address: json['address'] as String?,

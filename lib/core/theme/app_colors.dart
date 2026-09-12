@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Brand palette read from the Yayasan Al-Hisan logo (logo_7.png): deep
-/// Islamic green, gold/amber script accent, a maroon accent from the family
-/// icon, on a white/cream ground. Swap these hex values if the source asset
-/// is provided and the exact tones differ.
+/// Brand palette sampled from the real Yayasan Al-Hisan logo
+/// (assets/images/logo_7.png): the "AL-HISAN" wordmark's deep green, the
+/// gold/amber used for the subtitle and book spine, a warm red from the
+/// family icon, and the navy-black book outline, on a white/cream ground.
 class AppColors {
   AppColors._();
 
@@ -11,7 +11,8 @@ class AppColors {
   static const Color deepGreenDark = Color(0xFF0A3524);
   static const Color gold = Color(0xFFC9A227);
   static const Color goldLight = Color(0xFFE6C866);
-  static const Color maroon = Color(0xFF7A2426);
+  static const Color maroon = Color(0xFFB0342A);
+  static const Color navy = Color(0xFF16213A);
   static const Color cream = Color(0xFFFBF8F1);
   static const Color ink = Color(0xFF1B231F);
 }

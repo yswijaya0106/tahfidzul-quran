@@ -54,9 +54,9 @@ class _ErrorView extends StatelessWidget {
     if (exception.isUnauthenticated) {
       return _MessageView(
         icon: Icons.lock_outline,
-        title: 'Session expired',
-        message: 'Please log in again to continue.',
-        actionLabel: 'Go to login',
+        title: 'Sesi berakhir',
+        message: 'Silakan masuk kembali untuk melanjutkan.',
+        actionLabel: 'Ke halaman masuk',
         onAction: () => context.goToLogin(),
       );
     }
@@ -64,26 +64,26 @@ class _ErrorView extends StatelessWidget {
     if (exception.isForbidden) {
       return const _MessageView(
         icon: Icons.block,
-        title: 'Access restricted',
-        message: 'You do not have permission to view this.',
+        title: 'Akses dibatasi',
+        message: 'Anda tidak memiliki izin untuk melihat ini.',
       );
     }
 
     if (exception.code == 'NETWORK_ERROR') {
       return _MessageView(
         icon: Icons.wifi_off,
-        title: 'You appear to be offline',
-        message: 'Check your connection and try again.',
-        actionLabel: onRetry != null ? 'Retry' : null,
+        title: 'Sepertinya Anda sedang offline',
+        message: 'Periksa koneksi Anda dan coba lagi.',
+        actionLabel: onRetry != null ? 'Coba lagi' : null,
         onAction: onRetry,
       );
     }
 
     return _MessageView(
       icon: Icons.error_outline,
-      title: 'Something went wrong',
+      title: 'Terjadi kesalahan',
       message: exception.message,
-      actionLabel: onRetry != null ? 'Retry' : null,
+      actionLabel: onRetry != null ? 'Coba lagi' : null,
       onAction: onRetry,
     );
   }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../application/user_admin_providers.dart';
 import '../domain/app_user_summary.dart';
 
 /// Admin-only user management screen (CLAUDE.md: "Admin can create,
-/// deactivate, reset, and assign location operators."). This build covers
-/// list + deactivate; create/assign forms are a follow-up increment.
+/// deactivate, reset, and assign location operators.").
 class UserAdminListScreen extends ConsumerWidget {
   const UserAdminListScreen({super.key});
 
@@ -16,18 +17,26 @@ class UserAdminListScreen extends ConsumerWidget {
     final users = ref.watch(userAdminListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
+      appBar: AppBar(title: const Text('Pengguna')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final created = await context.push<bool>('/users/new');
+          if (created == true) ref.invalidate(userAdminListProvider);
+        },
+        icon: const Icon(Icons.person_add_alt_1_rounded),
+        label: const Text('Tambah Pengguna'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(userAdminListProvider.future),
         child: AsyncValueView(
           value: users,
           onRetry: () => ref.invalidate(userAdminListProvider),
           isEmpty: (result) => result.data.isEmpty,
-          empty: (_) => const Center(child: Text('No users yet.')),
+          empty: (_) => const Center(child: Text('Belum ada pengguna.')),
           data: (context, result) => ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
             itemCount: result.data.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) =>
                 _UserTile(user: result.data[index]),
           ),
@@ -44,19 +53,41 @@ class _UserTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      minVerticalPadding: 16,
-      title: Text(user.fullName),
-      subtitle: Text('${user.role}${user.isActive ? '' : ' · Deactivated'}'),
-      trailing: user.isActive
-          ? TextButton(
-              onPressed: () async {
-                await ref.read(userAdminRepositoryProvider).deactivate(user.id);
-                ref.invalidate(userAdminListProvider);
-              },
-              child: const Text('Deactivate'),
-            )
-          : null,
+    final isAdmin = user.role == 'ADMIN';
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        minVerticalPadding: 16,
+        leading: CircleAvatar(
+          backgroundColor: (isAdmin ? AppColors.maroon : AppColors.deepGreen)
+              .withValues(alpha: 0.12),
+          child: Icon(
+            isAdmin ? Icons.shield_outlined : Icons.badge_outlined,
+            color: isAdmin ? AppColors.maroon : AppColors.deepGreen,
+          ),
+        ),
+        title: Text(
+          user.fullName,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          '${isAdmin ? 'Admin' : 'Operator Lokasi'}${user.isActive ? '' : ' · Nonaktif'}',
+        ),
+        trailing: user.isActive
+            ? TextButton(
+                onPressed: () async {
+                  await ref
+                      .read(userAdminRepositoryProvider)
+                      .deactivate(user.id);
+                  ref.invalidate(userAdminListProvider);
+                },
+                child: const Text('Nonaktifkan'),
+              )
+            : null,
+      ),
     );
   }
 }

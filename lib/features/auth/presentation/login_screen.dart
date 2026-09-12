@@ -59,14 +59,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Tahfidz Quran',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
+                    Image.asset(
+                      'assets/images/logo_7.png',
+                      height: 140,
+                      semanticLabel: 'Yayasan Pendidikan Islam Al-Hisan logo',
+                      errorBuilder: (context, error, stackTrace) => Text(
+                        'Tahfidz Quran',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Text(
-                      'Sign in with your phone number or email',
+                      'Masuk dengan nomor telepon atau email Anda',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -75,14 +80,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextFormField(
                       controller: _identifierController,
                       decoration: const InputDecoration(
-                        labelText: 'Phone or email',
+                        labelText: 'Telepon atau email',
                         semanticCounterText: '',
                       ),
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.username],
                       validator: (value) =>
                           (value == null || value.trim().isEmpty)
-                          ? 'Required'
+                          ? 'Wajib diisi'
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -90,7 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Kata sandi',
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -98,16 +103,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 : Icons.visibility_off,
                           ),
                           tooltip: _obscurePassword
-                              ? 'Show password'
-                              : 'Hide password',
+                              ? 'Tampilkan kata sandi'
+                              : 'Sembunyikan kata sandi',
                           onPressed: () => setState(
                             () => _obscurePassword = !_obscurePassword,
                           ),
                         ),
                       ),
                       autofillHints: const [AutofillHints.password],
-                      validator: (value) =>
-                          (value == null || value.isEmpty) ? 'Required' : null,
+                      validator: (value) => (value == null || value.isEmpty)
+                          ? 'Wajib diisi'
+                          : null,
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     const SizedBox(height: 24),
@@ -122,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign in'),
+                          : const Text('Masuk'),
                     ),
                   ],
                 ),
@@ -145,7 +151,7 @@ class _LoginErrorBanner extends StatelessWidget {
     final currentError = error;
     final message = currentError is AppException
         ? currentError.message
-        : 'Unable to sign in. Please try again.';
+        : 'Gagal masuk. Silakan coba lagi.';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

@@ -1,6 +1,7 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/pagination/page_result.dart';
 import '../domain/activity.dart';
+import '../domain/activity_photo.dart';
 import '../domain/activity_photo_input.dart';
 
 class ActivityRepository {
@@ -18,6 +19,19 @@ class ActivityRepository {
       query: {'page': page, 'pageSize': pageSize},
     );
     return PageResult.fromJson(response, Activity.fromJson);
+  }
+
+  Future<Activity> getById(String activityId) async {
+    final response = await _apiClient.get('/activities/$activityId');
+    return Activity.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  Future<List<ActivityPhoto>> getPhotos(String activityId) async {
+    final response = await _apiClient.get('/activities/$activityId/photos');
+    final rawData = response['data'] as List<dynamic>;
+    return rawData
+        .map((item) => ActivityPhoto.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Activity> create({

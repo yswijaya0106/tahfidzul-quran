@@ -35,11 +35,11 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
     final students = ref.watch(studentListProvider(params));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Students')),
+      appBar: AppBar(title: const Text('Siswa')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/students/new'),
         icon: const Icon(Icons.add),
-        label: const Text('Add student'),
+        label: const Text('Tambah Siswa'),
       ),
       body: Column(
         children: [
@@ -48,7 +48,7 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search by name',
+                labelText: 'Cari berdasarkan nama',
                 prefixIcon: Icon(Icons.search),
               ),
               onSubmitted: (value) =>
@@ -62,7 +62,8 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
                 value: students,
                 onRetry: () => ref.invalidate(studentListProvider(params)),
                 isEmpty: (result) => result.data.isEmpty,
-                empty: (_) => const Center(child: Text('No students found.')),
+                empty: (_) =>
+                    const Center(child: Text('Belum ada siswa ditemukan.')),
                 data: (context, result) => ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: result.data.length,

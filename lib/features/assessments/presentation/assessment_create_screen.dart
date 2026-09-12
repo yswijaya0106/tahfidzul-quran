@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../core/widgets/surah_verse_selector.dart';
 import '../../quran/application/quran_providers.dart';
 import '../../quran/domain/quran_surah.dart';
 import '../application/assessment_providers.dart';
@@ -95,7 +96,7 @@ class _AssessmentCreateScreenState
     final surahsAsync = ref.watch(quranSurahsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New assessment')),
+      appBar: AppBar(title: const Text('Setoran Baru')),
       body: AsyncValueView(
         value: surahsAsync,
         onRetry: () => ref.invalidate(quranSurahsProvider),
@@ -114,7 +115,7 @@ class _AssessmentCreateScreenState
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Assessment date'),
+              title: const Text('Tanggal setoran'),
               subtitle: Text(
                 _assessmentDate.toLocal().toString().split(' ').first,
               ),
@@ -126,7 +127,7 @@ class _AssessmentCreateScreenState
               segments: const [
                 ButtonSegment(
                   value: AssessmentType.newMemorization,
-                  label: Text('New memorization'),
+                  label: Text('Hafalan baru'),
                 ),
                 ButtonSegment(
                   value: AssessmentType.murojaah,
@@ -139,10 +140,10 @@ class _AssessmentCreateScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'Start position',
+              'Posisi awal',
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            _SurahVerseSelector(
+            SurahVerseSelector(
               surahs: surahs,
               surahNumber: _startSurah,
               verseNumber: _startVerse,
@@ -156,8 +157,8 @@ class _AssessmentCreateScreenState
               onVerseChanged: (value) => setState(() => _startVerse = value),
             ),
             const SizedBox(height: 16),
-            Text('End position', style: Theme.of(context).textTheme.titleSmall),
-            _SurahVerseSelector(
+            Text('Posisi akhir', style: Theme.of(context).textTheme.titleSmall),
+            SurahVerseSelector(
               surahs: surahs,
               surahNumber: _endSurah,
               verseNumber: _endVerse,
@@ -173,7 +174,7 @@ class _AssessmentCreateScreenState
             const SizedBox(height: 16),
             DropdownButtonFormField<Grade>(
               initialValue: _grade,
-              decoration: const InputDecoration(labelText: 'Grade'),
+              decoration: const InputDecoration(labelText: 'Nilai'),
               items: Grade.values
                   .map(
                     (g) => DropdownMenuItem(
@@ -187,7 +188,9 @@ class _AssessmentCreateScreenState
             const SizedBox(height: 16),
             TextFormField(
               controller: _notesController,
-              decoration: const InputDecoration(labelText: 'Notes (optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Catatan (opsional)',
+              ),
               maxLines: 3,
             ),
             const SizedBox(height: 24),
@@ -202,87 +205,11 @@ class _AssessmentCreateScreenState
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save assessment'),
+                  : const Text('Simpan setoran'),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class _SurahVerseSelector extends StatelessWidget {
-  final List<QuranSurah> surahs;
-  final int? surahNumber;
-  final int? verseNumber;
-  final String? errorText;
-  final ValueChanged<int?> onSurahChanged;
-  final ValueChanged<int?> onVerseChanged;
-
-  const _SurahVerseSelector({
-    required this.surahs,
-    required this.surahNumber,
-    required this.verseNumber,
-    required this.errorText,
-    required this.onSurahChanged,
-    required this.onVerseChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedSurah = surahs
-        .where((s) => s.surahNumber == surahNumber)
-        .firstOrNull;
-    final maxVerse = selectedSurah?.verseCount ?? 0;
-
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: DropdownButtonFormField<int>(
-            initialValue: surahNumber,
-            decoration: InputDecoration(
-              labelText: 'Surah',
-              errorText: errorText,
-            ),
-            isExpanded: true,
-            items: surahs
-                .map(
-                  (s) => DropdownMenuItem(
-                    value: s.surahNumber,
-                    child: Text(s.displayLabel),
-                  ),
-                )
-                .toList(),
-            onChanged: onSurahChanged,
-            validator: (value) => value == null ? 'Required' : null,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 2,
-          child: DropdownButtonFormField<int>(
-            initialValue: verseNumber,
-            decoration: const InputDecoration(labelText: 'Verse'),
-            isExpanded: true,
-            items: selectedSurah == null
-                ? const []
-                : List.generate(
-                    maxVerse,
-                    (index) => DropdownMenuItem(
-                      value: index + 1,
-                      child: Text('${index + 1}'),
-                    ),
-                  ),
-            onChanged: selectedSurah == null ? null : onVerseChanged,
-            validator: (value) => value == null ? 'Required' : null,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-extension _FirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }

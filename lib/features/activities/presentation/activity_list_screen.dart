@@ -20,11 +20,11 @@ class ActivityListScreen extends ConsumerWidget {
     final activities = ref.watch(activityListProvider(locationId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Activities')),
+      appBar: AppBar(title: const Text('Kegiatan')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/activities/new'),
         icon: const Icon(Icons.add_a_photo_outlined),
-        label: const Text('New activity'),
+        label: const Text('Kegiatan Baru'),
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(activityListProvider(locationId).future),
@@ -33,7 +33,7 @@ class ActivityListScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(activityListProvider(locationId)),
           isEmpty: (result) => result.data.isEmpty,
           empty: (_) =>
-              const Center(child: Text('No activities recorded yet.')),
+              const Center(child: Text('Belum ada kegiatan yang tercatat.')),
           data: (context, result) => ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: result.data.length,

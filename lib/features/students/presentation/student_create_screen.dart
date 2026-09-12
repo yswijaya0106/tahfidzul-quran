@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../angkatan/application/angkatan_providers.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/student_providers.dart';
 
@@ -25,6 +26,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
 
   bool _submitting = false;
   Map<String, String>? _serverFieldErrors;
+  String? _selectedAngkatanId;
 
   @override
   void dispose() {
@@ -51,6 +53,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
           .create(
             fullName: _fullNameController.text.trim(),
             locationId: locationId,
+            angkatanId: _selectedAngkatanId,
             nik: _nikController.text.trim().isEmpty
                 ? null
                 : _nikController.text.trim(),
@@ -84,8 +87,13 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locationId = ref.watch(selectedLocationIdProvider);
+    final angkatanList = locationId == null
+        ? null
+        : ref.watch(angkatanListProvider(locationId));
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add student')),
+      appBar: AppBar(title: const Text('Tambah Siswa')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -96,30 +104,57 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
               TextFormField(
                 controller: _fullNameController,
                 decoration: InputDecoration(
-                  labelText: 'Full name',
+                  labelText: 'Nama lengkap',
                   errorText: _serverFieldErrors?['fullName'],
                 ),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? 'Required' : null,
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Wajib diisi'
+                    : null,
               ),
+              const SizedBox(height: 16),
+              if (angkatanList != null)
+                angkatanList.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => const SizedBox.shrink(),
+                  data: (result) => result.data.isEmpty
+                      ? const SizedBox.shrink()
+                      : DropdownButtonFormField<String>(
+                          initialValue: _selectedAngkatanId,
+                          decoration: const InputDecoration(
+                            labelText: 'Angkatan (opsional)',
+                          ),
+                          items: result.data
+                              .map(
+                                (angkatan) => DropdownMenuItem(
+                                  value: angkatan.id,
+                                  child: Text(angkatan.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _selectedAngkatanId = value),
+                        ),
+                ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nikController,
-                decoration: const InputDecoration(labelText: 'NIK (optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'NIK (opsional)',
+                ),
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _guardianNameController,
                 decoration: const InputDecoration(
-                  labelText: "Guardian's name (optional)",
+                  labelText: 'Nama wali (opsional)',
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _studentPhoneController,
                 decoration: const InputDecoration(
-                  labelText: 'Student phone (optional)',
+                  labelText: 'Telepon siswa (opsional)',
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -127,7 +162,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
               TextFormField(
                 controller: _guardianPhoneController,
                 decoration: const InputDecoration(
-                  labelText: 'Guardian phone (optional)',
+                  labelText: 'Telepon wali (opsional)',
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -135,7 +170,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
               TextFormField(
                 controller: _addressController,
                 decoration: const InputDecoration(
-                  labelText: 'Address (optional)',
+                  labelText: 'Alamat (opsional)',
                 ),
                 maxLines: 2,
               ),
@@ -151,7 +186,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save student'),
+                    : const Text('Simpan siswa'),
               ),
             ],
           ),

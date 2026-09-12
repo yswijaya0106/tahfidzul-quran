@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="tahfidzul_quran"
+        android:label="Program 300 Hari Tahfidzul Quran"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

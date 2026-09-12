@@ -1,14 +1,17 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/pagination/page_result.dart';
 import '../domain/student.dart';
+import '../domain/student_profile.dart';
 
 class StudentRepository {
   final ApiClient _apiClient;
 
   StudentRepository({required this._apiClient});
 
+  /// [locationId] is optional so admins can search across every location
+  /// (the backend only scopes by location for non-admin callers).
   Future<PageResult<Student>> list({
-    required String locationId,
+    String? locationId,
     String? name,
     int page = 1,
     int pageSize = 20,
@@ -16,7 +19,7 @@ class StudentRepository {
     final response = await _apiClient.get(
       '/students',
       query: {
-        'locationId': locationId,
+        'locationId': ?locationId,
         'page': page,
         'pageSize': pageSize,
         if (name != null && name.isNotEmpty) 'name': name,
@@ -30,9 +33,15 @@ class StudentRepository {
     return Student.fromJson(response['data'] as Map<String, dynamic>);
   }
 
+  Future<StudentProfile> getProfile(String id) async {
+    final response = await _apiClient.get('/students/$id/profile');
+    return StudentProfile.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
   Future<Student> create({
     required String fullName,
     required String locationId,
+    String? angkatanId,
     String? nik,
     String? guardianName,
     String? address,
@@ -44,6 +53,7 @@ class StudentRepository {
       data: {
         'fullName': fullName,
         'locationId': locationId,
+        'angkatanId': ?angkatanId,
         'nik': ?nik,
         'guardianName': ?guardianName,
         'address': ?address,

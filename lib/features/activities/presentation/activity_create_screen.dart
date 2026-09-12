@@ -158,7 +158,7 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New activity')),
+      appBar: AppBar(title: const Text('Kegiatan Baru')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -168,14 +168,15 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? 'Required' : null,
+                decoration: const InputDecoration(labelText: 'Judul'),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Activity date'),
+                title: const Text('Tanggal kegiatan'),
                 subtitle: Text(
                   _activityDate.toLocal().toString().split(' ').first,
                 ),
@@ -186,7 +187,7 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
+                  labelText: 'Deskripsi (opsional)',
                 ),
                 maxLines: 3,
               ),
@@ -194,19 +195,19 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
               Row(
                 children: [
                   Text(
-                    'Photos (${_photos.length})',
+                    'Foto (${_photos.length})',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: _submitting ? null : _pickPhotos,
                     icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: const Text('Add photos'),
+                    label: const Text('Tambah foto'),
                   ),
                 ],
               ),
               Text(
-                'Photos are compressed to about 500KB before upload.',
+                'Foto akan dikompres menjadi sekitar 500KB sebelum diunggah.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
@@ -231,7 +232,7 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save activity'),
+                    : const Text('Simpan kegiatan'),
               ),
             ],
           ),
@@ -332,7 +333,7 @@ class _PhotoTile extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
             decoration: const InputDecoration(
-              hintText: 'Caption',
+              hintText: 'Keterangan',
               isDense: true,
               contentPadding: EdgeInsets.symmetric(vertical: 4),
               border: InputBorder.none,

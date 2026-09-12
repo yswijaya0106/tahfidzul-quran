@@ -1,5 +1,7 @@
+import '../../../core/domain/target_status.dart';
 import 'grade.dart';
 
+export '../../../core/domain/target_status.dart';
 export 'grade.dart';
 
 enum AssessmentType { newMemorization, murojaah }
@@ -13,7 +15,7 @@ String assessmentTypeToApi(AssessmentType type) =>
     type == AssessmentType.newMemorization ? 'NEW_MEMORIZATION' : 'MUROJAAH';
 
 String assessmentTypeLabel(AssessmentType type) =>
-    type == AssessmentType.newMemorization ? 'New memorization' : 'Murojaah';
+    type == AssessmentType.newMemorization ? 'Hafalan baru' : 'Murojaah';
 
 /// @deprecated use [gradeFromApi] from grade.dart instead; kept as an alias
 /// during the transition.
@@ -30,6 +32,9 @@ class MemorizationAssessment {
   final String studentId;
   final String locationId;
   final String assessmentDate;
+  /// The student's program day (1-300) on assessmentDate, or null if their
+  /// program_start_date isn't set.
+  final int? dayNumber;
   final AssessmentType assessmentType;
   final int startSurahNumber;
   final int startVerseNumber;
@@ -37,12 +42,16 @@ class MemorizationAssessment {
   final int endVerseNumber;
   final Grade grade;
   final String? notes;
+  final int? targetEndSurahNumber;
+  final int? targetEndVerseNumber;
+  final TargetStatus targetStatus;
 
   const MemorizationAssessment({
     required this.id,
     required this.studentId,
     required this.locationId,
     required this.assessmentDate,
+    required this.dayNumber,
     required this.assessmentType,
     required this.startSurahNumber,
     required this.startVerseNumber,
@@ -50,6 +59,9 @@ class MemorizationAssessment {
     required this.endVerseNumber,
     required this.grade,
     required this.notes,
+    required this.targetEndSurahNumber,
+    required this.targetEndVerseNumber,
+    required this.targetStatus,
   });
 
   factory MemorizationAssessment.fromJson(Map<String, dynamic> json) =>
@@ -58,6 +70,7 @@ class MemorizationAssessment {
         studentId: json['studentId'] as String,
         locationId: json['locationId'] as String,
         assessmentDate: json['assessmentDate'] as String,
+        dayNumber: json['dayNumber'] as int?,
         assessmentType: assessmentTypeFromApi(json['assessmentType'] as String),
         startSurahNumber: json['startSurahNumber'] as int,
         startVerseNumber: json['startVerseNumber'] as int,
@@ -65,5 +78,8 @@ class MemorizationAssessment {
         endVerseNumber: json['endVerseNumber'] as int,
         grade: gradeFromApi(json['grade'] as String),
         notes: json['notes'] as String?,
+        targetEndSurahNumber: json['targetEndSurahNumber'] as int?,
+        targetEndVerseNumber: json['targetEndVerseNumber'] as int?,
+        targetStatus: targetStatusFromApi(json['targetStatus'] as String),
       );
 }

@@ -14,3 +14,21 @@ final locationDashboardProvider = FutureProvider.autoDispose
           .watch(dashboardRepositoryProvider)
           .getLocationDashboard(locationId),
     );
+
+/// Admin-only cross-location progress overview for today.
+final locationsOverviewProvider = FutureProvider.autoDispose<LocationsOverview>(
+  (ref) => ref.watch(dashboardRepositoryProvider).getLocationsOverview(),
+);
+
+/// Admin-only list of students who submitted new memorization today.
+final memorizationProgressProvider =
+    FutureProvider.autoDispose<MemorizationProgressOverview>(
+      (ref) => ref.watch(dashboardRepositoryProvider).getMemorizationProgress(),
+    );
+
+/// Admin-only feed of today's activity photos across every location.
+final todayActivityPhotosProvider =
+    FutureProvider.autoDispose<TodayActivityPhotosOverview>(
+      (ref) =>
+          ref.watch(dashboardRepositoryProvider).getTodayActivityPhotos(),
+    );
