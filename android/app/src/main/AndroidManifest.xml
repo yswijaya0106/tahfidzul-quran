@@ -41,5 +41,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Required on Android 11+ (API 30+) package-visibility rules so
+             url_launcher can find a browser/Google Maps to open https
+             links (e.g. "Buka di Google Maps" on a location card). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>
