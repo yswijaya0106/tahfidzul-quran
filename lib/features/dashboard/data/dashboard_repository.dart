@@ -21,10 +21,14 @@ class DashboardRepository {
 
   Future<MemorizationProgressOverview> getMemorizationProgress({
     String? date,
+    String? locationId,
   }) async {
     final response = await _apiClient.get(
       '/dashboard/memorization-progress',
-      query: date == null ? null : {'date': date},
+      query: {
+        if (date != null) 'date': date,
+        if (locationId != null) 'locationId': locationId,
+      },
     );
     return MemorizationProgressOverview.fromJson(
       response['data'] as Map<String, dynamic>,
@@ -47,10 +51,16 @@ class DashboardRepository {
     return LeaderboardOverview.fromJson(response['data'] as Map<String, dynamic>);
   }
 
-  Future<TodayActivityPhotosOverview> getTodayActivityPhotos({String? date}) async {
+  Future<TodayActivityPhotosOverview> getTodayActivityPhotos({
+    String? date,
+    String? locationId,
+  }) async {
     final response = await _apiClient.get(
       '/dashboard/today-activity-photos',
-      query: date == null ? null : {'date': date},
+      query: {
+        if (date != null) 'date': date,
+        if (locationId != null) 'locationId': locationId,
+      },
     );
     return TodayActivityPhotosOverview.fromJson(
       response['data'] as Map<String, dynamic>,

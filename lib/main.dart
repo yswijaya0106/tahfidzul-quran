@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/network/debug_error_log_service.dart';
@@ -11,8 +12,10 @@ import 'core/theme/app_settings_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/debug_overlay.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   if (AppConstants.isDebugMode) _setupDebugErrorHooks();
+  await initializeDateFormatting('id_ID');
   runApp(const ProviderScope(child: TahfidzQuranApp()));
 }
 

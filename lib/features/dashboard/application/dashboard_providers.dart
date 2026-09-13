@@ -20,10 +20,14 @@ final locationsOverviewProvider = FutureProvider.autoDispose<LocationsOverview>(
   (ref) => ref.watch(dashboardRepositoryProvider).getLocationsOverview(),
 );
 
-/// Admin-only list of students who submitted new memorization today.
-final memorizationProgressProvider =
-    FutureProvider.autoDispose<MemorizationProgressOverview>(
-      (ref) => ref.watch(dashboardRepositoryProvider).getMemorizationProgress(),
+/// List of students who submitted new memorization on a chosen date. Pass
+/// `locationId` for a single rumah tahfidz (open to that location's
+/// operator); omit it for the admin-only, school-wide list.
+final memorizationProgressProvider = FutureProvider.autoDispose
+    .family<MemorizationProgressOverview, ({String? date, String? locationId})>(
+      (ref, params) => ref
+          .watch(dashboardRepositoryProvider)
+          .getMemorizationProgress(date: params.date, locationId: params.locationId),
     );
 
 /// Leaderboard ranking students by achievement vs. their daily target,
@@ -37,9 +41,12 @@ final leaderboardProvider = FutureProvider.autoDispose
           .getLeaderboard(scope: params.scope, locationId: params.locationId),
     );
 
-/// Admin-only feed of today's activity photos across every location.
-final todayActivityPhotosProvider =
-    FutureProvider.autoDispose<TodayActivityPhotosOverview>(
-      (ref) =>
-          ref.watch(dashboardRepositoryProvider).getTodayActivityPhotos(),
+/// Feed of activity photos uploaded on a chosen date. Pass `locationId` for
+/// a single rumah tahfidz (open to that location's operator); omit it for
+/// the admin-only, school-wide feed.
+final todayActivityPhotosProvider = FutureProvider.autoDispose
+    .family<TodayActivityPhotosOverview, ({String? date, String? locationId})>(
+      (ref, params) => ref
+          .watch(dashboardRepositoryProvider)
+          .getTodayActivityPhotos(date: params.date, locationId: params.locationId),
     );

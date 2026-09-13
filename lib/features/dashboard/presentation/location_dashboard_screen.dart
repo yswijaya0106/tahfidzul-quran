@@ -12,6 +12,7 @@ import '../../auth/domain/user.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/dashboard_providers.dart';
 import '../domain/location_dashboard.dart';
+import 'daily_activity_section.dart';
 import 'leaderboard_section.dart';
 
 const double _headerHeight = 230;
@@ -333,6 +334,8 @@ class _DashboardBody extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           LeaderboardSection(locationId: locationId),
+          const SizedBox(height: 24),
+          DailyActivitySection(locationId: locationId),
           const SizedBox(height: 24),
           const SectionHeader(
             icon: Icons.pie_chart_rounded,
