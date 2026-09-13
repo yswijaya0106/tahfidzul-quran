@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/brand_badge.dart';
 import '../../../core/widgets/decorative_header.dart';
+import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../dashboard/application/dashboard_providers.dart';
@@ -820,9 +821,10 @@ class _LocationPhotoGroupCardState extends State<_LocationPhotoGroupCard> {
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: visible
-                .map((photo) => _ActivityPhotoTile(photo: photo))
-                .toList(),
+            children: [
+              for (var i = 0; i < visible.length; i++)
+                _ActivityPhotoTile(photo: visible[i], allPhotos: visible, index: i),
+            ],
           ),
           if (photos.length > _collapsedCount)
             Align(
@@ -845,15 +847,29 @@ class _LocationPhotoGroupCardState extends State<_LocationPhotoGroupCard> {
 
 class _ActivityPhotoTile extends StatelessWidget {
   final TodayActivityPhoto photo;
+  final List<TodayActivityPhoto> allPhotos;
+  final int index;
 
-  const _ActivityPhotoTile({required this.photo});
+  const _ActivityPhotoTile({
+    required this.photo,
+    required this.allPhotos,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
     const size = 104.0;
     return InkWell(
       borderRadius: BorderRadius.circular(10),
-      onTap: () => context.push('/activities/${photo.activityId}'),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PhotoViewerScreen(
+            photoUrls: allPhotos.map((p) => p.photoUrl).toList(),
+            captions: allPhotos.map((p) => p.activityTitle).toList(),
+            initialIndex: index,
+          ),
+        ),
+      ),
       child: SizedBox(
         width: size,
         child: Column(

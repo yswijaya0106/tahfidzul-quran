@@ -55,9 +55,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isSelectingLocation = state.matchedLocation == '/locations';
       final isAdminHome = state.matchedLocation == '/admin/home';
       final hasLocation = ref.read(selectedLocationIdProvider) != null;
-      final needsLocation = _shellPaths.any(
-        (path) => state.matchedLocation.startsWith(path),
-      );
+      // Exact match only: full-screen detail/create routes such as
+      // /students/:id or /activities/:id are pushed OVER the shell (see
+      // their GoRoute comments below) and must stay reachable without a
+      // selected location — e.g. an admin tapping a student straight from
+      // the cross-location dashboard, with no location ever chosen. A
+      // startsWith() match here previously caught those sub-routes too and
+      // bounced the admin straight back to /admin/home before the page
+      // could render, making every such link look "unclickable".
+      final needsLocation = _shellPaths.contains(state.matchedLocation);
 
       if (authState.isLoading) return null;
       if (!isLoggedIn && !isLoggingIn) return '/login';
