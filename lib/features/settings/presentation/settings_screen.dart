@@ -12,7 +12,11 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/user.dart';
 import '../../locations/application/location_providers.dart';
 
-const double _headerHeight = 216;
+// Generous height with margin: the badge chip below the name/email was
+// clipping by a few pixels on some devices at the default font scale, and
+// this header's text also scales with the user's "Ukuran Font" preference
+// (see main.dart's app-wide TextScaler), so it needs slack for that too.
+const double _headerHeight = 244;
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
