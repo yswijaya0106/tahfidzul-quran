@@ -337,23 +337,9 @@ class _LeaderboardSectionState extends ConsumerState<_LeaderboardSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SegmentedButton<LeaderboardScope>(
-          segments: const [
-            ButtonSegment(
-              value: LeaderboardScope.aggregate,
-              label: Text('Sejak Awal Program'),
-              icon: Icon(Icons.trending_up_rounded, size: 16),
-            ),
-            ButtonSegment(
-              value: LeaderboardScope.daily,
-              label: Text('Hari Ini'),
-              icon: Icon(Icons.today_rounded, size: 16),
-            ),
-          ],
-          selected: {_scope},
-          onSelectionChanged: (selection) =>
-              setState(() => _scope = selection.first),
-          style: const ButtonStyle(visualDensity: VisualDensity.compact),
+        _ScopeToggle(
+          scope: _scope,
+          onChanged: (scope) => setState(() => _scope = scope),
         ),
         const SizedBox(height: 12),
         AsyncValueView(
@@ -370,6 +356,93 @@ class _LeaderboardSectionState extends ConsumerState<_LeaderboardSection> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Rounded two-way pill toggle. Replaces [SegmentedButton], whose segments
+/// don't stretch evenly and let long labels wrap onto a second line inside a
+/// narrow segment — this always splits the full width 50/50.
+class _ScopeToggle extends StatelessWidget {
+  final LeaderboardScope scope;
+  final ValueChanged<LeaderboardScope> onChanged;
+
+  const _ScopeToggle({required this.scope, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ScopeButton(
+              icon: Icons.trending_up_rounded,
+              label: 'Sejak Awal',
+              selected: scope == LeaderboardScope.aggregate,
+              onTap: () => onChanged(LeaderboardScope.aggregate),
+            ),
+          ),
+          Expanded(
+            child: _ScopeButton(
+              icon: Icons.today_rounded,
+              label: 'Hari Ini',
+              selected: scope == LeaderboardScope.daily,
+              onTap: () => onChanged(LeaderboardScope.daily),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScopeButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ScopeButton({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.gold : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: selected ? Colors.white : Colors.grey.shade600),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? Colors.white : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -393,44 +466,53 @@ class _LeaderboardRow extends StatelessWidget {
         ? '${item.locationName} · ${item.kabKota}'
         : item.locationName;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: _rankColor, shape: BoxShape.circle),
-            child: Text(
-              '${item.rank}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
+    return InkWell(
+      onTap: () => context.push('/students/${item.studentId}'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: _rankColor, shape: BoxShape.circle),
+              child: Text(
+                '${item.rank}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(
+                    '$locationLine · Hari ke-${item.dayNumber}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(item.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
                 Text(
-                  '$locationLine · Hari ke-${item.dayNumber}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  item.isAhead ? '+${item.deltaVerses} ayat' : '${item.deltaVerses} ayat',
+                  style: TextStyle(color: deltaColor, fontWeight: FontWeight.w700, fontSize: 13),
                 ),
+                const Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey),
               ],
             ),
-          ),
-          Text(
-            item.isAhead ? '+${item.deltaVerses} ayat' : '${item.deltaVerses} ayat',
-            style: TextStyle(color: deltaColor, fontWeight: FontWeight.w700, fontSize: 13),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
