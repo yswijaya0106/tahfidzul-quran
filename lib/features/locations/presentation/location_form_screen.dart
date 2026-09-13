@@ -475,6 +475,20 @@ class _MemberEntry {
   }
 }
 
+/// Fixed set of organizational roles a rumah tahfidz can assign — mirrors
+/// the roles used to seed demo data (backend seedDummyData.ts's
+/// ORG_ROLE_TITLES), kept as a static picklist instead of free text so
+/// naming stays consistent across locations.
+const List<String> kOrganizationRoleTitles = [
+  'Ketua',
+  'Sekretaris',
+  'Bendahara',
+  'Pengawas',
+  'Bagian Perlengkapan',
+  'Bagian Kesiswaan',
+  'Pembimbing',
+];
+
 class _MemberFormRow extends StatelessWidget {
   final _MemberEntry entry;
   final VoidCallback onRemove;
@@ -483,6 +497,15 @@ class _MemberFormRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentRole = entry.roleTitleController.text.trim();
+    final roleOptions = [
+      ...kOrganizationRoleTitles,
+      // Preserve an existing custom value (e.g. loaded from data seeded
+      // before this picklist existed) instead of silently discarding it.
+      if (currentRole.isNotEmpty && !kOrganizationRoleTitles.contains(currentRole))
+        currentRole,
+    ];
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -499,9 +522,18 @@ class _MemberFormRow extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: entry.roleTitleController,
+                      child: DropdownButtonFormField<String>(
+                        initialValue: currentRole.isEmpty ? null : currentRole,
                         decoration: const InputDecoration(labelText: 'Jabatan'),
+                        isExpanded: true,
+                        items: [
+                          for (final role in roleOptions)
+                            DropdownMenuItem(
+                              value: role,
+                              child: Text(role, overflow: TextOverflow.ellipsis),
+                            ),
+                        ],
+                        onChanged: (value) => entry.roleTitleController.text = value ?? '',
                       ),
                     ),
                     const SizedBox(width: 8),
