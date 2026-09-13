@@ -26,13 +26,15 @@ final memorizationProgressProvider =
       (ref) => ref.watch(dashboardRepositoryProvider).getMemorizationProgress(),
     );
 
-/// Admin-only, school-wide leaderboard ranking students by achievement vs.
-/// their daily target — either aggregated since program start or scoped to
-/// today's submissions.
+/// Leaderboard ranking students by achievement vs. their daily target,
+/// either aggregated since program start or scoped to today's submissions.
+/// Pass `locationId` for a single rumah tahfidz's leaderboard (open to that
+/// location's operator); omit it for the admin-only, school-wide one.
 final leaderboardProvider = FutureProvider.autoDispose
-    .family<LeaderboardOverview, LeaderboardScope>(
-      (ref, scope) =>
-          ref.watch(dashboardRepositoryProvider).getLeaderboard(scope: scope),
+    .family<LeaderboardOverview, ({LeaderboardScope scope, String? locationId})>(
+      (ref, params) => ref
+          .watch(dashboardRepositoryProvider)
+          .getLeaderboard(scope: params.scope, locationId: params.locationId),
     );
 
 /// Admin-only feed of today's activity photos across every location.

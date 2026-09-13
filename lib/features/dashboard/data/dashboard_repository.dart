@@ -34,12 +34,14 @@ class DashboardRepository {
   Future<LeaderboardOverview> getLeaderboard({
     required LeaderboardScope scope,
     String? date,
+    String? locationId,
   }) async {
     final response = await _apiClient.get(
       '/dashboard/leaderboard',
       query: {
         'scope': leaderboardScopeToApi(scope),
         if (date != null) 'date': date,
+        if (locationId != null) 'locationId': locationId,
       },
     );
     return LeaderboardOverview.fromJson(response['data'] as Map<String, dynamic>);

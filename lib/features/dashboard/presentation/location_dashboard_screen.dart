@@ -12,6 +12,7 @@ import '../../auth/domain/user.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/dashboard_providers.dart';
 import '../domain/location_dashboard.dart';
+import 'leaderboard_section.dart';
 
 const double _headerHeight = 230;
 
@@ -138,7 +139,8 @@ class LocationDashboardScreen extends ConsumerWidget {
                 value: dashboard,
                 onRetry: () =>
                     ref.invalidate(locationDashboardProvider(locationId)),
-                data: (context, data) => _DashboardBody(data: data),
+                data: (context, data) =>
+                    _DashboardBody(data: data, locationId: locationId),
               ),
             ),
           ],
@@ -286,8 +288,9 @@ const Map<String, String> _gradeLabels = {
 
 class _DashboardBody extends StatelessWidget {
   final LocationDashboard data;
+  final String locationId;
 
-  const _DashboardBody({required this.data});
+  const _DashboardBody({required this.data, required this.locationId});
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +325,14 @@ class _DashboardBody extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 24),
+          const SectionHeader(
+            icon: Icons.leaderboard_rounded,
+            title: 'Papan Peringkat Hafalan',
+            color: AppColors.navy,
+          ),
+          const SizedBox(height: 12),
+          LeaderboardSection(locationId: locationId),
           const SizedBox(height: 24),
           const SectionHeader(
             icon: Icons.pie_chart_rounded,

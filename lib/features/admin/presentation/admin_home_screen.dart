@@ -11,6 +11,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../dashboard/application/dashboard_providers.dart';
 import '../../dashboard/domain/location_dashboard.dart';
+import '../../dashboard/presentation/leaderboard_section.dart';
 import '../../locations/application/location_providers.dart';
 
 const double _headerHeight = 210;
@@ -136,7 +137,7 @@ class AdminHomeScreen extends ConsumerWidget {
                       color: AppColors.gold,
                     ),
                     const SizedBox(height: 12),
-                    const _LeaderboardSection(),
+                    const LeaderboardSection(),
                     const SizedBox(height: 28),
                     const SectionHeader(
                       icon: Icons.today_rounded,
@@ -321,204 +322,6 @@ class _QuickActionButton extends StatelessWidget {
 /// Ranks students school-wide by how far their achieved Quran position
 /// exceeds (or trails) their daily target, with a toggle between the
 /// cumulative ("since program start") and today-only rankings.
-class _LeaderboardSection extends ConsumerStatefulWidget {
-  const _LeaderboardSection();
-
-  @override
-  ConsumerState<_LeaderboardSection> createState() => _LeaderboardSectionState();
-}
-
-class _LeaderboardSectionState extends ConsumerState<_LeaderboardSection> {
-  LeaderboardScope _scope = LeaderboardScope.aggregate;
-
-  @override
-  Widget build(BuildContext context) {
-    final leaderboard = ref.watch(leaderboardProvider(_scope));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _ScopeToggle(
-          scope: _scope,
-          onChanged: (scope) => setState(() => _scope = scope),
-        ),
-        const SizedBox(height: 12),
-        AsyncValueView(
-          value: leaderboard,
-          onRetry: () => ref.invalidate(leaderboardProvider(_scope)),
-          isEmpty: (result) => result.items.isEmpty,
-          empty: (_) => const _EmptyListMessage(
-            text: 'Belum ada data pencapaian untuk ditampilkan.',
-          ),
-          data: (context, result) => _ShowMoreList(
-            items: result.items
-                .map<Widget>((item) => _LeaderboardRow(item: item))
-                .toList(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Rounded two-way pill toggle. Replaces [SegmentedButton], whose segments
-/// don't stretch evenly and let long labels wrap onto a second line inside a
-/// narrow segment — this always splits the full width 50/50.
-class _ScopeToggle extends StatelessWidget {
-  final LeaderboardScope scope;
-  final ValueChanged<LeaderboardScope> onChanged;
-
-  const _ScopeToggle({required this.scope, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ScopeButton(
-              icon: Icons.trending_up_rounded,
-              label: 'Sejak Awal',
-              selected: scope == LeaderboardScope.aggregate,
-              onTap: () => onChanged(LeaderboardScope.aggregate),
-            ),
-          ),
-          Expanded(
-            child: _ScopeButton(
-              icon: Icons.today_rounded,
-              label: 'Hari Ini',
-              selected: scope == LeaderboardScope.daily,
-              onTap: () => onChanged(LeaderboardScope.daily),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ScopeButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ScopeButton({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.gold : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 15, color: selected ? Colors.white : Colors.grey.shade600),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? Colors.white : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LeaderboardRow extends StatelessWidget {
-  final LeaderboardItem item;
-
-  const _LeaderboardRow({required this.item});
-
-  Color get _rankColor => switch (item.rank) {
-    1 => AppColors.gold,
-    2 => const Color(0xFF9AA0A6),
-    3 => const Color(0xFFB0672D),
-    _ => AppColors.deepGreen.withValues(alpha: 0.5),
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final deltaColor = item.isAhead ? AppColors.deepGreen : AppColors.maroon;
-    final locationLine = item.kabKota != null
-        ? '${item.locationName} · ${item.kabKota}'
-        : item.locationName;
-
-    return InkWell(
-      onTap: () => context.push('/students/${item.studentId}'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: _rankColor, shape: BoxShape.circle),
-              child: Text(
-                '${item.rank}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  Text(
-                    '$locationLine · Hari ke-${item.dayNumber}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  item.isAhead ? '+${item.deltaVerses} ayat' : '${item.deltaVerses} ayat',
-                  style: TextStyle(color: deltaColor, fontWeight: FontWeight.w700, fontSize: 13),
-                ),
-                const Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyListMessage extends StatelessWidget {
   final String text;
 
