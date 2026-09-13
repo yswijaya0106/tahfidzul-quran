@@ -9,7 +9,6 @@ import '../../features/activities/presentation/admin_activities_screen.dart';
 import '../../features/admin/presentation/admin_home_screen.dart';
 import '../../features/admin/presentation/admin_home_shell.dart';
 import '../../features/angkatan/domain/angkatan.dart';
-import '../../features/angkatan/presentation/admin_angkatan_screen.dart';
 import '../../features/angkatan/presentation/angkatan_form_screen.dart';
 import '../../features/angkatan/presentation/angkatan_list_screen.dart';
 import '../../features/assessments/presentation/assessment_create_screen.dart';
@@ -84,8 +83,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
-      // Admin's main bottom-nav shell: Rumah Tahfidz / Pencarian / Profil /
-      // Kegiatan, each tab keeping its own stack via
+      // Admin's main bottom-nav shell: Beranda / Pencarian / Profil / Kegiatan
+      // / Angkatan / Pengaturan, each tab keeping its own stack via
       // StatefulShellRoute.indexedStack.
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AdminHomeShell(shell: shell),
@@ -125,8 +124,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/admin/angkatan',
-                builder: (context, state) => const AdminAngkatanScreen(),
+                path: '/admin/settings',
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),

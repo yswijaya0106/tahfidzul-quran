@@ -11,10 +11,16 @@ class AssessmentRepository {
     String studentId, {
     int page = 1,
     int pageSize = 20,
+    AssessmentType? assessmentType,
   }) async {
     final response = await _apiClient.get(
       '/students/$studentId/assessments',
-      query: {'page': page, 'pageSize': pageSize},
+      query: {
+        'page': page,
+        'pageSize': pageSize,
+        if (assessmentType != null)
+          'assessmentType': assessmentTypeToApi(assessmentType),
+      },
     );
     return PageResult.fromJson(response, MemorizationAssessment.fromJson);
   }

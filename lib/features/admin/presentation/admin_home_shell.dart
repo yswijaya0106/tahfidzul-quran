@@ -6,8 +6,10 @@ import '../../../core/theme/app_colors.dart';
 /// Bottom-navigation shell for the admin's main area: Beranda (the existing
 /// admin landing page), Pencarian (search students by name), Profil (the
 /// selected student's profile + memorization progress), Kegiatan
-/// (per-location activities, expandable on demand), and Angkatan
-/// (per-location intake cohorts, expandable on demand).
+/// (per-location activities, expandable on demand), and Pengaturan (theme,
+/// font size, and account management — not location-scoped). Managing
+/// angkatan stays reachable from the Beranda quick-access grid instead of a
+/// tab of its own, to keep six labels from crowding the bar.
 ///
 /// Every label is kept to a single word: a two-word label (e.g. the former
 /// "Rumah Tahfidz") wraps to two lines while its siblings stay on one,
@@ -23,40 +25,64 @@ class AdminHomeShell extends StatelessWidget {
     'Pencarian',
     'Profil',
     'Kegiatan',
-    'Angkatan',
+    'Pengaturan',
   ];
   static const _icons = [
     Icons.mosque_outlined,
     Icons.search_outlined,
     Icons.person_outline,
     Icons.event_note_outlined,
-    Icons.groups_2_outlined,
+    Icons.settings_outlined,
   ];
   static const _selectedIcons = [
     Icons.mosque_rounded,
     Icons.search_rounded,
     Icons.person_rounded,
     Icons.event_note_rounded,
-    Icons.groups_2_rounded,
+    Icons.settings_rounded,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) =>
-            shell.goBranch(index, initialLocation: index == shell.currentIndex),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: AppColors.goldLight.withValues(alpha: 0.55),
-        destinations: List.generate(
-          _labels.length,
-          (i) => NavigationDestination(
-            icon: Icon(_icons[i]),
-            selectedIcon: Icon(_selectedIcons[i]),
-            label: _labels[i],
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.deepGreen
+                  : Colors.grey.shade600,
+            ),
+          ),
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => TextStyle(
+              fontSize: 12,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.deepGreen
+                  : Colors.grey.shade600,
+            ),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: shell.currentIndex,
+          onDestinationSelected: (index) => shell.goBranch(
+            index,
+            initialLocation: index == shell.currentIndex,
+          ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: AppColors.goldLight.withValues(alpha: 0.55),
+          destinations: List.generate(
+            _labels.length,
+            (i) => NavigationDestination(
+              icon: Icon(_icons[i]),
+              selectedIcon: Icon(_selectedIcons[i]),
+              label: _labels[i],
+            ),
           ),
         ),
       ),

@@ -14,6 +14,7 @@ class Student {
   final String? address;
   final String? studentPhone;
   final String? guardianPhone;
+  final String? studentPhotoUrl;
   final StudentStatus status;
 
   const Student({
@@ -27,6 +28,7 @@ class Student {
     required this.address,
     required this.studentPhone,
     required this.guardianPhone,
+    required this.studentPhotoUrl,
     required this.status,
   });
 
@@ -41,6 +43,7 @@ class Student {
     address: json['address'] as String?,
     studentPhone: json['studentPhone'] as String?,
     guardianPhone: json['guardianPhone'] as String?,
+    studentPhotoUrl: json['studentPhotoUrl'] as String?,
     status: studentStatusFromApi(json['status'] as String),
   );
 }

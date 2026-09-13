@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/user_admin_providers.dart';
 
@@ -79,10 +81,17 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SectionHeader(
+                icon: Icons.badge_rounded,
+                title: 'Identitas Pengguna',
+                color: AppColors.deepGreen,
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _fullNameController,
                 decoration: InputDecoration(
                   labelText: 'Nama lengkap',
+                  prefixIcon: const Icon(Icons.person_outline),
                   errorText: _serverFieldErrors?['fullName'],
                 ),
                 validator: (value) => (value == null || value.trim().length < 2)
@@ -94,6 +103,7 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
                   errorText: _serverFieldErrors?['email'],
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -103,17 +113,27 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
                 controller: _phoneController,
                 decoration: const InputDecoration(
                   labelText: 'Telepon (opsional bila ada email)',
+                  prefixIcon: Icon(Icons.phone_iphone_rounded),
                 ),
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Kata sandi'),
+                decoration: const InputDecoration(
+                  labelText: 'Kata sandi',
+                  prefixIcon: Icon(Icons.lock_outline_rounded),
+                ),
                 obscureText: true,
                 validator: (value) => (value == null || value.length < 8)
                     ? 'Minimal 8 karakter'
                     : null,
+              ),
+              const SizedBox(height: 24),
+              const SectionHeader(
+                icon: Icons.admin_panel_settings_rounded,
+                title: 'Peran & Penugasan',
+                color: AppColors.navy,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(

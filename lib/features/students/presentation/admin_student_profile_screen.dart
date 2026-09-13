@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../assessments/presentation/achievement_chart.dart';
 import '../../assessments/presentation/assessment_history_list.dart';
 import '../application/student_providers.dart';
 import '../domain/student.dart';
@@ -76,15 +79,33 @@ class _StudentProfileBody extends ConsumerWidget {
       data: (context, result) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _ProfileHeader(student: result.student),
-          const SizedBox(height: 16),
-          _ProgressCard(progress: result.progress),
-          const Divider(height: 32),
-          Text(
-            'Riwayat Setoran',
-            style: Theme.of(context).textTheme.titleMedium,
+          AppCard(
+            padding: const EdgeInsets.all(16),
+            child: _ProfileHeader(student: result.student),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
+          const SectionHeader(
+            icon: Icons.menu_book_rounded,
+            title: 'Progress Hafalan',
+            color: AppColors.deepGreen,
+          ),
+          const SizedBox(height: 12),
+          _ProgressCard(progress: result.progress),
+          const SizedBox(height: 24),
+          const SectionHeader(
+            icon: Icons.show_chart_rounded,
+            title: 'Grafik Pencapaian',
+            color: AppColors.gold,
+          ),
+          const SizedBox(height: 12),
+          AchievementChart(studentId: studentId),
+          const SizedBox(height: 24),
+          const SectionHeader(
+            icon: Icons.history_edu_rounded,
+            title: 'Riwayat Setoran',
+            color: AppColors.maroon,
+          ),
+          const SizedBox(height: 12),
           AssessmentHistoryList(studentId: studentId),
         ],
       ),
@@ -145,68 +166,58 @@ class _ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.menu_book_rounded,
-                  size: 20,
-                  color: AppColors.deepGreen,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Progress Hafalan',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PositionRow(
+            icon: Icons.auto_stories_rounded,
+            iconColor: AppColors.gold,
+            label: 'Hafalan Baru Terakhir',
+            position: progress.latestNewMemorization,
+          ),
+          const SizedBox(height: 12),
+          _PositionRow(
+            icon: Icons.replay_rounded,
+            iconColor: AppColors.navy,
+            label: 'Murojaah Terakhir',
+            position: progress.latestMurojaah,
+          ),
+          if (progress.distributionByGrade.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _PositionRow(
-              label: 'Hafalan Baru Terakhir',
-              position: progress.latestNewMemorization,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: progress.distributionByGrade.entries
+                  .where((entry) => entry.value > 0)
+                  .map(
+                    (entry) => Chip(
+                      label: Text('${entry.key}: ${entry.value}'),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  )
+                  .toList(),
             ),
-            const SizedBox(height: 8),
-            _PositionRow(
-              label: 'Murojaah Terakhir',
-              position: progress.latestMurojaah,
-            ),
-            if (progress.distributionByGrade.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: progress.distributionByGrade.entries
-                    .where((entry) => entry.value > 0)
-                    .map(
-                      (entry) => Chip(
-                        label: Text('${entry.key}: ${entry.value}'),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
 class _PositionRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
   final String label;
   final AssessmentPosition? position;
 
-  const _PositionRow({required this.label, required this.position});
+  const _PositionRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.position,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -219,12 +230,27 @@ class _PositionRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 150,
-          child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 17, color: iconColor),
         ),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                value,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ],
     );

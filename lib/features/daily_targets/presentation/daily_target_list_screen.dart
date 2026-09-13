@@ -3,9 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../application/daily_target_providers.dart';
 import '../domain/daily_target.dart';
+
+const List<Color> _tileColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
 
 /// Admin-only CRUD for the "Target Tilawah/Tahfidz 300 Hari" reference
 /// schedule. All 300 days are fetched once; a search field filters by day
@@ -18,8 +26,7 @@ class DailyTargetListScreen extends ConsumerStatefulWidget {
       _DailyTargetListScreenState();
 }
 
-class _DailyTargetListScreenState
-    extends ConsumerState<DailyTargetListScreen> {
+class _DailyTargetListScreenState extends ConsumerState<DailyTargetListScreen> {
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -53,7 +60,9 @@ class _DailyTargetListScreenState
               decoration: InputDecoration(
                 labelText: 'Cari hari ke-...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 isDense: true,
               ),
               onChanged: (value) => setState(() => _query = value.trim()),
@@ -66,14 +75,15 @@ class _DailyTargetListScreenState
                 value: targetsAsync,
                 onRetry: () => ref.invalidate(dailyTargetListProvider),
                 isEmpty: (result) => result.isEmpty,
-                empty: (_) => const Center(
-                  child: Text('Belum ada data target harian.'),
-                ),
+                empty: (_) =>
+                    const Center(child: Text('Belum ada data target harian.')),
                 data: (context, result) {
                   final filtered = _query.isEmpty
                       ? result
                       : result
-                            .where((t) => t.dayNumber.toString().contains(_query))
+                            .where(
+                              (t) => t.dayNumber.toString().contains(_query),
+                            )
                             .toList();
                   if (filtered.isEmpty) {
                     return const Center(
@@ -87,8 +97,10 @@ class _DailyTargetListScreenState
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 88),
                     itemCount: filtered.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) =>
-                        _DailyTargetTile(target: filtered[index]),
+                    itemBuilder: (context, index) => _DailyTargetTile(
+                      target: filtered[index],
+                      color: _tileColors[index % _tileColors.length],
+                    ),
                   );
                 },
               ),
@@ -102,8 +114,9 @@ class _DailyTargetListScreenState
 
 class _DailyTargetTile extends ConsumerWidget {
   final DailyTarget target;
+  final Color color;
 
-  const _DailyTargetTile({required this.target});
+  const _DailyTargetTile({required this.target, required this.color});
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -145,49 +158,58 @@ class _DailyTargetTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-          child: Text(
-            '${target.dayNumber}',
-            style: const TextStyle(
-              color: AppColors.deepGreen,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          minVerticalPadding: 14,
+          leading: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '${target.dayNumber}',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
-        ),
-        title: Text(
-          'Hari ke-${target.dayNumber}',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          'Surah ${target.startSurahNumber}:${target.startVerseNumber} — '
-          '${target.endSurahNumber}:${target.endVerseNumber}',
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: 'Edit target',
-              onPressed: () async {
-                final changed = await context.push<bool>(
-                  '/daily-targets/${target.dayNumber}/edit',
-                  extra: target,
-                );
-                if (changed == true) ref.invalidate(dailyTargetListProvider);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Hapus target',
-              onPressed: () => _confirmDelete(context, ref),
-            ),
-          ],
+          title: Text(
+            'Hari ke-${target.dayNumber}',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            'Surah ${target.startSurahNumber}:${target.startVerseNumber} — '
+            '${target.endSurahNumber}:${target.endVerseNumber}',
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: 'Edit target',
+                onPressed: () async {
+                  final changed = await context.push<bool>(
+                    '/daily-targets/${target.dayNumber}/edit',
+                    extra: target,
+                  );
+                  if (changed == true) ref.invalidate(dailyTargetListProvider);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: AppColors.maroon),
+                tooltip: 'Hapus target',
+                onPressed: () => _confirmDelete(context, ref),
+              ),
+            ],
+          ),
         ),
       ),
     );

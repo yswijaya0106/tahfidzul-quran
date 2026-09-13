@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/brand_badge.dart';
 import '../../../core/widgets/decorative_header.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/user.dart';
 import '../../locations/application/location_providers.dart';
@@ -150,11 +151,13 @@ class LocationDashboardScreen extends ConsumerWidget {
 class _QuickJumpItem {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onTap;
 
   const _QuickJumpItem({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onTap,
   });
 }
@@ -170,11 +173,13 @@ class _QuickJumpBar extends StatelessWidget {
       _QuickJumpItem(
         icon: Icons.person_add_alt_1_rounded,
         label: 'Tambah\nSiswa',
+        color: AppColors.deepGreen,
         onTap: () => context.push('/students/new'),
       ),
       _QuickJumpItem(
         icon: Icons.menu_book_rounded,
         label: 'Setoran\nBaru',
+        color: AppColors.gold,
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -189,16 +194,19 @@ class _QuickJumpBar extends StatelessWidget {
       _QuickJumpItem(
         icon: Icons.add_a_photo_rounded,
         label: 'Aktivitas\nBaru',
+        color: AppColors.maroon,
         onTap: () => context.push('/activities/new'),
       ),
       _QuickJumpItem(
         icon: Icons.groups_rounded,
         label: 'Semua\nSiswa',
+        color: AppColors.navy,
         onTap: () => context.go('/students'),
       ),
       _QuickJumpItem(
         icon: Icons.groups_2_rounded,
         label: 'Kelola\nAngkatan',
+        color: AppColors.deepGreen,
         onTap: () => context.go('/angkatan'),
       ),
     ];
@@ -241,10 +249,10 @@ class _QuickJumpButton extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.goldLight.withValues(alpha: 0.35),
+                color: item.color.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: Icon(item.icon, color: AppColors.deepGreen),
+              child: Icon(item.icon, color: item.color),
             ),
             const SizedBox(height: 6),
             Text(
@@ -315,57 +323,39 @@ class _DashboardBody extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const _SectionHeader(
+          const SectionHeader(
             icon: Icons.pie_chart_rounded,
             title: 'Distribusi Nilai',
+            color: AppColors.gold,
           ),
           const SizedBox(height: 12),
           _GradeDistributionCard(distribution: data.distributionByGrade),
           const SizedBox(height: 24),
-          const _SectionHeader(
+          const SectionHeader(
             icon: Icons.emoji_events_rounded,
             title: '10 Siswa Teraktif',
+            color: AppColors.navy,
           ),
           const SizedBox(height: 12),
           _TopStudentsCard(students: data.topStudents),
           const SizedBox(height: 24),
-          const _SectionHeader(
+          const SectionHeader(
             icon: Icons.notification_important_rounded,
             title: 'Belum Ada Setoran Terbaru',
+            color: AppColors.maroon,
           ),
           const SizedBox(height: 12),
           _InactiveStudentsCard(students: data.studentsWithoutRecentAssessment),
           const SizedBox(height: 24),
-          const _SectionHeader(
+          const SectionHeader(
             icon: Icons.photo_library_rounded,
             title: 'Aktivitas Terbaru',
+            color: AppColors.deepGreen,
           ),
           const SizedBox(height: 12),
           _RecentActivitiesCard(activities: data.recentActivities),
         ],
       ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
-
-  const _SectionHeader({required this.icon, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.deepGreen),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
-      ],
     );
   }
 }

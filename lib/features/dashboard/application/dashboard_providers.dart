@@ -26,6 +26,15 @@ final memorizationProgressProvider =
       (ref) => ref.watch(dashboardRepositoryProvider).getMemorizationProgress(),
     );
 
+/// Admin-only, school-wide leaderboard ranking students by achievement vs.
+/// their daily target — either aggregated since program start or scoped to
+/// today's submissions.
+final leaderboardProvider = FutureProvider.autoDispose
+    .family<LeaderboardOverview, LeaderboardScope>(
+      (ref, scope) =>
+          ref.watch(dashboardRepositoryProvider).getLeaderboard(scope: scope),
+    );
+
 /// Admin-only feed of today's activity photos across every location.
 final todayActivityPhotosProvider =
     FutureProvider.autoDispose<TodayActivityPhotosOverview>(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/user.dart';
@@ -65,6 +66,7 @@ class AngkatanListScreen extends ConsumerWidget {
               angkatan: result.data[index],
               locationId: locationId,
               isAdmin: isAdmin,
+              colorIndex: index,
             ),
           ),
         ),
@@ -73,15 +75,24 @@ class AngkatanListScreen extends ConsumerWidget {
   }
 }
 
+const List<Color> _angkatanIconColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
+
 class _AngkatanTile extends ConsumerWidget {
   final Angkatan angkatan;
   final String locationId;
   final bool isAdmin;
+  final int colorIndex;
 
   const _AngkatanTile({
     required this.angkatan,
     required this.locationId,
     required this.isAdmin,
+    required this.colorIndex,
   });
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
@@ -124,44 +135,46 @@ class _AngkatanTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-          child: const Icon(Icons.groups_outlined, color: AppColors.deepGreen),
+    final iconColor =
+        _angkatanIconColors[colorIndex % _angkatanIconColors.length];
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        child: AppIconTile(
+          icon: Icons.groups_outlined,
+          iconColor: iconColor,
+          title: angkatan.name,
+          subtitle: '${angkatan.startDate} — ${angkatan.endDate}',
+          trailing: isAdmin
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      tooltip: 'Edit angkatan',
+                      onPressed: () async {
+                        final changed = await context.push<bool>(
+                          '/angkatan/${angkatan.id}/edit',
+                          extra: {
+                            'locationId': locationId,
+                            'angkatan': angkatan,
+                          },
+                        );
+                        if (changed == true) {
+                          ref.invalidate(angkatanListProvider(locationId));
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: 'Hapus angkatan',
+                      onPressed: () => _confirmDelete(context, ref),
+                    ),
+                  ],
+                )
+              : null,
         ),
-        title: Text(
-          angkatan.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text('${angkatan.startDate} — ${angkatan.endDate}'),
-        trailing: isAdmin
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit angkatan',
-                    onPressed: () async {
-                      final changed = await context.push<bool>(
-                        '/angkatan/${angkatan.id}/edit',
-                        extra: {'locationId': locationId, 'angkatan': angkatan},
-                      );
-                      if (changed == true) {
-                        ref.invalidate(angkatanListProvider(locationId));
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Hapus angkatan',
-                    onPressed: () => _confirmDelete(context, ref),
-                  ),
-                ],
-              )
-            : null,
       ),
     );
   }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// Circular logo badge. Renders `assets/images/logo_7.png` when present in
-/// the bundle; falls back to a book glyph on the brand gradient otherwise so
-/// the UI never breaks while the real asset is being added.
+/// Rounded-square logo badge. Renders `assets/images/logo_7.png` when present
+/// in the bundle; falls back to a book glyph on the brand gradient otherwise
+/// so the UI never breaks while the real asset is being added.
 class BrandBadge extends StatelessWidget {
   final double size;
 
@@ -12,14 +12,16 @@ class BrandBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
+    final radius = BorderRadius.circular(size * 0.28);
+    return ClipRRect(
+      borderRadius: radius,
       child: Container(
         width: size,
         height: size,
         decoration: const BoxDecoration(color: Colors.white),
         child: Image.asset(
           'assets/images/logo_7.png',
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) => Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(

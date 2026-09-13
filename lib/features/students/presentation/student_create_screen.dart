@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../angkatan/application/angkatan_providers.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/student_providers.dart';
+import 'student_photo_field.dart';
 
 class StudentCreateScreen extends ConsumerStatefulWidget {
   const StudentCreateScreen({super.key});
@@ -27,6 +30,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
   bool _submitting = false;
   Map<String, String>? _serverFieldErrors;
   String? _selectedAngkatanId;
+  String? _studentPhotoObjectKey;
 
   @override
   void dispose() {
@@ -69,6 +73,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
             guardianPhone: _guardianPhoneController.text.trim().isEmpty
                 ? null
                 : _guardianPhoneController.text.trim(),
+            studentPhotoObjectKey: _studentPhotoObjectKey,
           );
 
       if (mounted) {
@@ -101,10 +106,22 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              StudentPhotoField(
+                onUploaded: (uploaded) =>
+                    setState(() => _studentPhotoObjectKey = uploaded.objectKey),
+              ),
+              const SizedBox(height: 24),
+              const SectionHeader(
+                icon: Icons.badge_rounded,
+                title: 'Data Siswa',
+                color: AppColors.deepGreen,
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _fullNameController,
                 decoration: InputDecoration(
                   labelText: 'Nama lengkap',
+                  prefixIcon: const Icon(Icons.person_outline),
                   errorText: _serverFieldErrors?['fullName'],
                 ),
                 validator: (value) => (value == null || value.trim().isEmpty)
@@ -140,14 +157,22 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
                 controller: _nikController,
                 decoration: const InputDecoration(
                   labelText: 'NIK (opsional)',
+                  prefixIcon: Icon(Icons.credit_card_rounded),
                 ),
                 keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              const SectionHeader(
+                icon: Icons.contact_phone_rounded,
+                title: 'Kontak & Alamat',
+                color: AppColors.navy,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _guardianNameController,
                 decoration: const InputDecoration(
                   labelText: 'Nama wali (opsional)',
+                  prefixIcon: Icon(Icons.family_restroom_rounded),
                 ),
               ),
               const SizedBox(height: 16),
@@ -155,6 +180,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
                 controller: _studentPhoneController,
                 decoration: const InputDecoration(
                   labelText: 'Telepon siswa (opsional)',
+                  prefixIcon: Icon(Icons.phone_iphone_rounded),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -163,6 +189,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
                 controller: _guardianPhoneController,
                 decoration: const InputDecoration(
                   labelText: 'Telepon wali (opsional)',
+                  prefixIcon: Icon(Icons.phone_rounded),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -171,6 +198,7 @@ class _StudentCreateScreenState extends ConsumerState<StudentCreateScreen> {
                 controller: _addressController,
                 decoration: const InputDecoration(
                   labelText: 'Alamat (opsional)',
+                  prefixIcon: Icon(Icons.location_on_outlined),
                 ),
                 maxLines: 2,
               ),

@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/brand_badge.dart';
 import '../../../core/widgets/decorative_header.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../dashboard/application/dashboard_providers.dart';
 import '../../dashboard/domain/location_dashboard.dart';
@@ -120,16 +121,26 @@ class AdminHomeScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    const _SectionHeader(
+                    const SectionHeader(
                       icon: Icons.grid_view_rounded,
                       title: 'Akses Cepat',
+                      color: AppColors.deepGreen,
                     ),
                     const SizedBox(height: 12),
                     const _AdminQuickActions(),
                     const SizedBox(height: 28),
-                    const _SectionHeader(
+                    const SectionHeader(
+                      icon: Icons.leaderboard_rounded,
+                      title: 'Papan Peringkat Hafalan',
+                      color: AppColors.gold,
+                    ),
+                    const SizedBox(height: 12),
+                    const _LeaderboardSection(),
+                    const SizedBox(height: 28),
+                    const SectionHeader(
                       icon: Icons.today_rounded,
                       title: 'Progress Hari Ini',
+                      color: AppColors.navy,
                     ),
                     const SizedBox(height: 8),
                     AsyncValueView(
@@ -148,9 +159,10 @@ class AdminHomeScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const _SectionHeader(
+                    const SectionHeader(
                       icon: Icons.menu_book_rounded,
                       title: 'Setoran Hafalan Hari Ini',
+                      color: AppColors.gold,
                     ),
                     const SizedBox(height: 8),
                     AsyncValueView(
@@ -169,9 +181,10 @@ class AdminHomeScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const _SectionHeader(
+                    const SectionHeader(
                       icon: Icons.photo_library_rounded,
                       title: 'Foto Kegiatan Hari Ini',
+                      color: AppColors.maroon,
                     ),
                     const SizedBox(height: 8),
                     AsyncValueView(
@@ -198,11 +211,13 @@ class AdminHomeScreen extends ConsumerWidget {
 class _QuickActionItem {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onTap;
 
   const _QuickActionItem({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onTap,
   });
 }
@@ -216,26 +231,31 @@ class _AdminQuickActions extends StatelessWidget {
       _QuickActionItem(
         icon: Icons.mosque_outlined,
         label: 'Rumah\nTahfidz',
+        color: AppColors.navy,
         onTap: () => context.push('/locations?redirect=/dashboard'),
       ),
       _QuickActionItem(
         icon: Icons.manage_accounts_rounded,
         label: 'Kelola\nUsers',
+        color: AppColors.maroon,
         onTap: () => context.push('/users'),
       ),
       _QuickActionItem(
         icon: Icons.menu_book_rounded,
         label: 'Lihat\nKegiatan',
+        color: AppColors.gold,
         onTap: () => context.push('/locations?redirect=/activities'),
       ),
       _QuickActionItem(
         icon: Icons.fact_check_rounded,
         label: 'Setoran\nHarian',
+        color: AppColors.deepGreen,
         onTap: () => context.push('/locations?redirect=/dashboard'),
       ),
       _QuickActionItem(
         icon: Icons.groups_2_rounded,
         label: 'Kelola\nAngkatan',
+        color: AppColors.navy,
         onTap: () => context.push('/locations?redirect=/angkatan'),
       ),
     ];
@@ -277,10 +297,10 @@ class _QuickActionButton extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.goldLight.withValues(alpha: 0.35),
+                color: item.color.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: Icon(item.icon, color: AppColors.deepGreen),
+              child: Icon(item.icon, color: item.color),
             ),
             const SizedBox(height: 6),
             Text(
@@ -297,25 +317,121 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
+/// Ranks students school-wide by how far their achieved Quran position
+/// exceeds (or trails) their daily target, with a toggle between the
+/// cumulative ("since program start") and today-only rankings.
+class _LeaderboardSection extends ConsumerStatefulWidget {
+  const _LeaderboardSection();
 
-  const _SectionHeader({required this.icon, required this.title});
+  @override
+  ConsumerState<_LeaderboardSection> createState() => _LeaderboardSectionState();
+}
+
+class _LeaderboardSectionState extends ConsumerState<_LeaderboardSection> {
+  LeaderboardScope _scope = LeaderboardScope.aggregate;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final leaderboard = ref.watch(leaderboardProvider(_scope));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: AppColors.deepGreen),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        SegmentedButton<LeaderboardScope>(
+          segments: const [
+            ButtonSegment(
+              value: LeaderboardScope.aggregate,
+              label: Text('Sejak Awal Program'),
+              icon: Icon(Icons.trending_up_rounded, size: 16),
+            ),
+            ButtonSegment(
+              value: LeaderboardScope.daily,
+              label: Text('Hari Ini'),
+              icon: Icon(Icons.today_rounded, size: 16),
+            ),
+          ],
+          selected: {_scope},
+          onSelectionChanged: (selection) =>
+              setState(() => _scope = selection.first),
+          style: const ButtonStyle(visualDensity: VisualDensity.compact),
+        ),
+        const SizedBox(height: 12),
+        AsyncValueView(
+          value: leaderboard,
+          onRetry: () => ref.invalidate(leaderboardProvider(_scope)),
+          isEmpty: (result) => result.items.isEmpty,
+          empty: (_) => const _EmptyListMessage(
+            text: 'Belum ada data pencapaian untuk ditampilkan.',
+          ),
+          data: (context, result) => _ShowMoreList(
+            items: result.items
+                .map<Widget>((item) => _LeaderboardRow(item: item))
+                .toList(),
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _LeaderboardRow extends StatelessWidget {
+  final LeaderboardItem item;
+
+  const _LeaderboardRow({required this.item});
+
+  Color get _rankColor => switch (item.rank) {
+    1 => AppColors.gold,
+    2 => const Color(0xFF9AA0A6),
+    3 => const Color(0xFFB0672D),
+    _ => AppColors.deepGreen.withValues(alpha: 0.5),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final deltaColor = item.isAhead ? AppColors.deepGreen : AppColors.maroon;
+    final locationLine = item.kabKota != null
+        ? '${item.locationName} · ${item.kabKota}'
+        : item.locationName;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: _rankColor, shape: BoxShape.circle),
+            child: Text(
+              '${item.rank}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.fullName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  '$locationLine · Hari ke-${item.dayNumber}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            item.isAhead ? '+${item.deltaVerses} ayat' : '${item.deltaVerses} ayat',
+            style: TextStyle(color: deltaColor, fontWeight: FontWeight.w700, fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 }

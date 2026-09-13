@@ -180,7 +180,20 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
                 subtitle: Text(
                   _activityDate.toLocal().toString().split(' ').first,
                 ),
-                trailing: const Icon(Icons.calendar_today),
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.navy.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.calendar_today_rounded,
+                    size: 17,
+                    color: AppColors.navy,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: _submitting ? null : _pickDate,
               ),
               const SizedBox(height: 16),
@@ -194,9 +207,25 @@ class _ActivityCreateScreenState extends ConsumerState<ActivityCreateScreen> {
               const SizedBox(height: 20),
               Row(
                 children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.photo_library_rounded,
+                      size: 15,
+                      color: AppColors.gold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     'Foto (${_photos.length})',
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const Spacer(),
                   TextButton.icon(

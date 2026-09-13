@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/surah_verse_selector.dart';
 import '../../quran/application/quran_providers.dart';
 import '../../quran/domain/quran_surah.dart';
@@ -115,11 +117,24 @@ class _AssessmentCreateScreenState
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.deepGreen.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.calendar_today_rounded,
+                  size: 18,
+                  color: AppColors.deepGreen,
+                ),
+              ),
               title: const Text('Tanggal setoran'),
               subtitle: Text(
                 _assessmentDate.toLocal().toString().split(' ').first,
               ),
-              trailing: const Icon(Icons.calendar_today),
+              trailing: const Icon(Icons.chevron_right_rounded),
               onTap: _pickDate,
             ),
             const SizedBox(height: 8),
@@ -138,11 +153,13 @@ class _AssessmentCreateScreenState
               onSelectionChanged: (selection) =>
                   setState(() => _assessmentType = selection.first),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Posisi awal',
-              style: Theme.of(context).textTheme.titleSmall,
+            const SizedBox(height: 20),
+            const SectionHeader(
+              icon: Icons.play_circle_outline_rounded,
+              title: 'Posisi awal',
+              color: AppColors.deepGreen,
             ),
+            const SizedBox(height: 8),
             SurahVerseSelector(
               surahs: surahs,
               surahNumber: _startSurah,
@@ -156,8 +173,13 @@ class _AssessmentCreateScreenState
               }),
               onVerseChanged: (value) => setState(() => _startVerse = value),
             ),
-            const SizedBox(height: 16),
-            Text('Posisi akhir', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 20),
+            const SectionHeader(
+              icon: Icons.stop_circle_outlined,
+              title: 'Posisi akhir',
+              color: AppColors.navy,
+            ),
+            const SizedBox(height: 8),
             SurahVerseSelector(
               surahs: surahs,
               surahNumber: _endSurah,

@@ -266,6 +266,99 @@ class StudentMemorizationProgress {
       );
 }
 
+enum LeaderboardScope { aggregate, daily }
+
+String leaderboardScopeToApi(LeaderboardScope scope) =>
+    scope == LeaderboardScope.aggregate ? 'AGGREGATE' : 'DAILY';
+
+/// Admin-only, school-wide ranking of students by how far their achieved
+/// Quran position exceeds (or trails) their daily target, in linear verse
+/// count. `scope: aggregate` compares each student's furthest-ever position
+/// against today's target for their program day; `scope: daily` only
+/// considers students who submitted a new-memorization assessment on [date].
+class LeaderboardOverview {
+  final LeaderboardScope scope;
+  final String date;
+  final String lastUpdatedAt;
+  final List<LeaderboardItem> items;
+
+  const LeaderboardOverview({
+    required this.scope,
+    required this.date,
+    required this.lastUpdatedAt,
+    required this.items,
+  });
+
+  factory LeaderboardOverview.fromJson(Map<String, dynamic> json) {
+    return LeaderboardOverview(
+      scope: (json['scope'] as String) == 'AGGREGATE'
+          ? LeaderboardScope.aggregate
+          : LeaderboardScope.daily,
+      date: json['date'] as String,
+      lastUpdatedAt: json['lastUpdatedAt'] as String,
+      items: (json['data'] as List<dynamic>)
+          .map((e) => LeaderboardItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class LeaderboardItem {
+  final int rank;
+  final String studentId;
+  final String fullName;
+  final String studentCode;
+  final String locationId;
+  final String locationName;
+  final String? kabKota;
+  final int dayNumber;
+  final String? assessmentDate;
+  final int achievedEndSurahNumber;
+  final int achievedEndVerseNumber;
+  final int targetEndSurahNumber;
+  final int targetEndVerseNumber;
+  final int deltaVerses;
+  final TargetStatus targetStatus;
+
+  const LeaderboardItem({
+    required this.rank,
+    required this.studentId,
+    required this.fullName,
+    required this.studentCode,
+    required this.locationId,
+    required this.locationName,
+    required this.kabKota,
+    required this.dayNumber,
+    required this.assessmentDate,
+    required this.achievedEndSurahNumber,
+    required this.achievedEndVerseNumber,
+    required this.targetEndSurahNumber,
+    required this.targetEndVerseNumber,
+    required this.deltaVerses,
+    required this.targetStatus,
+  });
+
+  bool get isAhead => deltaVerses >= 0;
+
+  factory LeaderboardItem.fromJson(Map<String, dynamic> json) => LeaderboardItem(
+    rank: json['rank'] as int,
+    studentId: json['studentId'] as String,
+    fullName: json['fullName'] as String,
+    studentCode: json['studentCode'] as String,
+    locationId: json['locationId'] as String,
+    locationName: json['locationName'] as String,
+    kabKota: json['kabKota'] as String?,
+    dayNumber: json['dayNumber'] as int,
+    assessmentDate: json['assessmentDate'] as String?,
+    achievedEndSurahNumber: json['achievedEndSurahNumber'] as int,
+    achievedEndVerseNumber: json['achievedEndVerseNumber'] as int,
+    targetEndSurahNumber: json['targetEndSurahNumber'] as int,
+    targetEndVerseNumber: json['targetEndVerseNumber'] as int,
+    deltaVerses: json['deltaVerses'] as int,
+    targetStatus: targetStatusFromApi(json['targetStatus'] as String),
+  );
+}
+
 /// Admin-only feed of today's activity photos across every location, most
 /// recently uploaded first.
 class TodayActivityPhotosOverview {

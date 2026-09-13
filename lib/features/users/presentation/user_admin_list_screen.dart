@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../application/user_admin_providers.dart';
 import '../domain/app_user_summary.dart';
@@ -36,7 +37,7 @@ class UserAdminListScreen extends ConsumerWidget {
           data: (context, result) => ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
             itemCount: result.data.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) =>
                 _UserTile(user: result.data[index]),
           ),
@@ -54,39 +55,32 @@ class _UserTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdmin = user.role == 'ADMIN';
+    final color = isAdmin ? AppColors.maroon : AppColors.deepGreen;
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        minVerticalPadding: 16,
-        leading: CircleAvatar(
-          backgroundColor: (isAdmin ? AppColors.maroon : AppColors.deepGreen)
-              .withValues(alpha: 0.12),
-          child: Icon(
-            isAdmin ? Icons.shield_outlined : Icons.badge_outlined,
-            color: isAdmin ? AppColors.maroon : AppColors.deepGreen,
-          ),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: AppIconTile(
+          icon: isAdmin ? Icons.shield_outlined : Icons.badge_outlined,
+          iconColor: color,
+          title: user.fullName,
+          subtitle:
+              '${isAdmin ? 'Admin' : 'Operator Lokasi'}${user.isActive ? '' : ' · Nonaktif'}',
+          trailing: user.isActive
+              ? TextButton(
+                  onPressed: () async {
+                    await ref
+                        .read(userAdminRepositoryProvider)
+                        .deactivate(user.id);
+                    ref.invalidate(userAdminListProvider);
+                  },
+                  child: const Text('Nonaktifkan'),
+                )
+              : null,
         ),
-        title: Text(
-          user.fullName,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          '${isAdmin ? 'Admin' : 'Operator Lokasi'}${user.isActive ? '' : ' · Nonaktif'}',
-        ),
-        trailing: user.isActive
-            ? TextButton(
-                onPressed: () async {
-                  await ref
-                      .read(userAdminRepositoryProvider)
-                      .deactivate(user.id);
-                  ref.invalidate(userAdminListProvider);
-                },
-                child: const Text('Nonaktifkan'),
-              )
-            : null,
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/activity_providers.dart';
@@ -38,8 +40,10 @@ class ActivityListScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             itemCount: result.data.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, index) =>
-                _ActivityTile(activity: result.data[index]),
+            itemBuilder: (context, index) => _ActivityTile(
+              activity: result.data[index],
+              iconColor: _rowColors[index % _rowColors.length],
+            ),
           ),
         ),
       ),
@@ -47,21 +51,29 @@ class ActivityListScreen extends ConsumerWidget {
   }
 }
 
+const _rowColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
+
 class _ActivityTile extends StatelessWidget {
   final Activity activity;
+  final Color iconColor;
 
-  const _ActivityTile({required this.activity});
+  const _ActivityTile({required this.activity, required this.iconColor});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        minVerticalPadding: 16,
-        title: Text(activity.title),
-        subtitle: Text(
-          '${activity.activityDate}${activity.description != null ? '\n${activity.description}' : ''}',
-        ),
-        isThreeLine: activity.description != null,
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: AppIconTile(
+        icon: Icons.photo_library_rounded,
+        iconColor: iconColor,
+        title: activity.title,
+        subtitle:
+            '${activity.activityDate}${activity.description != null ? '\n${activity.description}' : ''}',
       ),
     );
   }

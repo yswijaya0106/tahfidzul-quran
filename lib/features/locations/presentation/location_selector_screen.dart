@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/brand_badge.dart';
 import '../../../core/widgets/decorative_header.dart';
@@ -10,6 +11,13 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/user.dart';
 import '../application/location_providers.dart';
 import '../domain/location.dart';
+
+const List<Color> _locationColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
 
 const double _headerHeight = 168;
 
@@ -112,6 +120,7 @@ class LocationSelectorScreen extends ConsumerWidget {
                     location: result.data[index],
                     isAdmin: isAdmin,
                     redirectPath: redirectPath,
+                    color: _locationColors[index % _locationColors.length],
                   ),
                 ),
               ),
@@ -127,72 +136,81 @@ class _LocationTile extends ConsumerWidget {
   final TahfidzLocation location;
   final bool isAdmin;
   final String redirectPath;
+  final Color color;
 
   const _LocationTile({
     required this.location,
     required this.isAdmin,
     required this.redirectPath,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isInactive = location.status == LocationStatus.inactive;
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        minVerticalPadding: 16,
-        leading: CircleAvatar(
-          backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-          child: const Icon(Icons.mosque_outlined, color: AppColors.deepGreen),
-        ),
-        title: Text(
-          location.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          location.addressLine,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isInactive)
-              const Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: Chip(
-                  label: Text('Nonaktif', style: TextStyle(fontSize: 11)),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              tooltip: 'Struktur organisasi',
-              onPressed: () => context.push('/locations/${location.id}'),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+          minVerticalPadding: 16,
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
-            if (isAdmin)
+            child: Icon(Icons.mosque_outlined, color: color),
+          ),
+          title: Text(
+            location.name,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            location.addressLine,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isInactive)
+                const Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: Chip(
+                    label: Text('Nonaktif', style: TextStyle(fontSize: 11)),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit lokasi',
-                onPressed: () async {
-                  final changed = await context.push<bool>(
-                    '/locations/${location.id}/edit',
-                    extra: location,
-                  );
-                  if (changed == true) ref.invalidate(locationListProvider);
-                },
+                icon: const Icon(Icons.info_outline),
+                tooltip: 'Struktur organisasi',
+                onPressed: () => context.push('/locations/${location.id}'),
               ),
-            const Icon(Icons.chevron_right),
-          ],
+              if (isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: 'Edit lokasi',
+                  onPressed: () async {
+                    final changed = await context.push<bool>(
+                      '/locations/${location.id}/edit',
+                      extra: location,
+                    );
+                    if (changed == true) ref.invalidate(locationListProvider);
+                  },
+                ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+          onTap: () {
+            ref.read(selectedLocationIdProvider.notifier).state = location.id;
+            context.go(redirectPath);
+          },
         ),
-        onTap: () {
-          ref.read(selectedLocationIdProvider.notifier).state = location.id;
-          context.go(redirectPath);
-        },
       ),
     );
   }

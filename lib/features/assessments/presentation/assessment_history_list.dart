@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../application/assessment_providers.dart';
 import '../domain/assessment.dart';
@@ -25,17 +26,31 @@ class AssessmentHistoryList extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(child: Text('Belum ada setoran yang tercatat.')),
       ),
-      data: (context, result) => Column(
-        children: [
-          for (var i = 0; i < result.data.length; i++) ...[
-            if (i > 0) const Divider(height: 1),
-            _AssessmentTile(assessment: result.data[i]),
+      data: (context, result) => AppCard(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          children: [
+            for (var i = 0; i < result.data.length; i++) ...[
+              if (i > 0) const Divider(height: 1, indent: 68),
+              _AssessmentTile(assessment: result.data[i]),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 }
+
+/// Grade -> accent color, matching the mapping used for the grade
+/// distribution chart on the location dashboard, so the same grade always
+/// reads as the same color across the app.
+const Map<Grade, Color> _gradeColors = {
+  Grade.mumtaz: AppColors.deepGreen,
+  Grade.jayyidJiddan: AppColors.gold,
+  Grade.jayyid: AppColors.goldLight,
+  Grade.maqbul: AppColors.navy,
+  Grade.rasib: AppColors.maroon,
+};
 
 class _AssessmentTile extends StatelessWidget {
   final MemorizationAssessment assessment;
@@ -50,18 +65,28 @@ class _AssessmentTile extends StatelessWidget {
     final showTargetBadge =
         assessment.assessmentType == AssessmentType.newMemorization &&
         assessment.dayNumber != null;
+    final gradeColor = _gradeColors[assessment.grade] ?? AppColors.ink;
 
     // A plain Row instead of ListTile: ListTile enforces a fixed tile height
     // based on title/subtitle line count, which doesn't leave room for the
     // trailing grade chip + target badge stacking to two lines.
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            child: Text(
-              assessmentTypeLabel(assessment.assessmentType).substring(0, 1),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: gradeColor.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                assessmentTypeLabel(assessment.assessmentType).substring(0, 1),
+                style: TextStyle(fontWeight: FontWeight.w800, color: gradeColor),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -92,7 +117,15 @@ class _AssessmentTile extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Chip(label: Text(assessmentGradeLabel(assessment.grade))),
+              Chip(
+                label: Text(assessmentGradeLabel(assessment.grade)),
+                backgroundColor: gradeColor.withValues(alpha: 0.14),
+                labelStyle: TextStyle(
+                  color: gradeColor,
+                  fontWeight: FontWeight.w700,
+                ),
+                side: BorderSide.none,
+              ),
               if (showTargetBadge) ...[
                 const SizedBox(height: 4),
                 _TargetStatusBadge(status: assessment.targetStatus),

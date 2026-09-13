@@ -72,9 +72,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Tahfidz Quran'), findsOneWidget);
+    expect(find.text('AL-HISAN'), findsOneWidget);
     expect(
-      find.widgetWithText(TextFormField, 'Phone or email'),
+      find.widgetWithText(TextFormField, 'Telepon atau email'),
       findsOneWidget,
     );
   });

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../application/student_providers.dart';
 import '../domain/student.dart';
@@ -83,9 +84,11 @@ class _StudentSearchScreenState extends ConsumerState<StudentSearchScreen> {
                     data: (context, result) => ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       itemCount: result.data.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) =>
-                          _StudentResultTile(student: result.data[index]),
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) => _StudentResultTile(
+                        student: result.data[index],
+                        color: _resultColors[index % _resultColors.length],
+                      ),
                     ),
                   ),
           ),
@@ -95,37 +98,43 @@ class _StudentSearchScreenState extends ConsumerState<StudentSearchScreen> {
   }
 }
 
+const _resultColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
+
 class _StudentResultTile extends ConsumerWidget {
   final Student student;
+  final Color color;
 
-  const _StudentResultTile({required this.student});
+  const _StudentResultTile({required this.student, required this.color});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-          child: const Icon(Icons.person_outline, color: AppColors.deepGreen),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: AppIconTile(
+          icon: Icons.person_outline,
+          iconColor: color,
+          title: student.fullName,
+          subtitle: student.studentCode,
+          onTap: () {
+            ref.read(selectedProfileStudentIdProvider.notifier).state =
+                student.id;
+            final shell = StatefulNavigationShell.maybeOf(context);
+            if (shell != null) {
+              shell.goBranch(2); // Profil tab
+            } else {
+              context.push('/students/${student.id}');
+            }
+          },
         ),
-        title: Text(
-          student.fullName,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(student.studentCode),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          ref.read(selectedProfileStudentIdProvider.notifier).state =
-              student.id;
-          final shell = StatefulNavigationShell.maybeOf(context);
-          if (shell != null) {
-            shell.goBranch(2); // Profil tab
-          } else {
-            context.push('/students/${student.id}');
-          }
-        },
       ),
     );
   }

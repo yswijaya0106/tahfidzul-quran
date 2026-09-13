@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/section_header.dart';
 import '../application/location_providers.dart';
 import '../domain/location.dart';
 
@@ -207,6 +209,10 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                 decoration: InputDecoration(
                   labelText: 'Nama lokasi',
                   errorText: _serverFieldErrors?['name'],
+                  prefixIcon: const Icon(
+                    Icons.mosque_outlined,
+                    color: AppColors.deepGreen,
+                  ),
                 ),
                 validator: (value) => (value == null || value.trim().length < 2)
                     ? 'Minimal 2 karakter'
@@ -218,6 +224,10 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                 decoration: InputDecoration(
                   labelText: 'Alamat',
                   errorText: _serverFieldErrors?['address'],
+                  prefixIcon: const Icon(
+                    Icons.location_on_outlined,
+                    color: AppColors.gold,
+                  ),
                 ),
                 maxLines: 2,
                 validator: (value) => (value == null || value.trim().isEmpty)
@@ -229,6 +239,7 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                 controller: _phoneController,
                 decoration: const InputDecoration(
                   labelText: 'Telepon (opsional)',
+                  prefixIcon: Icon(Icons.phone_outlined, color: AppColors.navy),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -267,17 +278,23 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Deskripsi (opsional)',
+                  prefixIcon: Icon(
+                    Icons.notes_rounded,
+                    color: AppColors.maroon,
+                  ),
                 ),
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Text(
-                    'Struktur Organisasi',
-                    style: Theme.of(context).textTheme.titleSmall,
+                  const Expanded(
+                    child: SectionHeader(
+                      icon: Icons.groups_rounded,
+                      title: 'Struktur Organisasi',
+                      color: AppColors.deepGreen,
+                    ),
                   ),
-                  const Spacer(),
                   TextButton.icon(
                     onPressed: _addMember,
                     icon: const Icon(Icons.add, size: 18),
@@ -299,7 +316,9 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
               else if (_members.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('Belum ada anggota. Tap "Tambah" untuk menambahkan.'),
+                  child: Text(
+                    'Belum ada anggota. Tap "Tambah" untuk menambahkan.',
+                  ),
                 )
               else
                 for (var i = 0; i < _members.length; i++)
@@ -416,7 +435,7 @@ class _MemberFormRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: const Icon(Icons.delete_outline, color: AppColors.maroon),
             tooltip: 'Hapus anggota',
             onPressed: onRemove,
           ),

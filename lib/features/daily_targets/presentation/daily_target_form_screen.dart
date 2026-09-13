@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/surah_verse_selector.dart';
 import '../../quran/application/quran_providers.dart';
 import '../../quran/domain/quran_surah.dart';
@@ -23,8 +25,7 @@ class DailyTargetFormScreen extends ConsumerStatefulWidget {
       _DailyTargetFormScreenState();
 }
 
-class _DailyTargetFormScreenState
-    extends ConsumerState<DailyTargetFormScreen> {
+class _DailyTargetFormScreenState extends ConsumerState<DailyTargetFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _dayNumberController = TextEditingController(
     text: widget.target?.dayNumber.toString(),
@@ -90,9 +91,8 @@ class _DailyTargetFormScreenState
     } on AppException catch (error) {
       setState(() => _serverFieldErrors = error.fields);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -130,6 +130,10 @@ class _DailyTargetFormScreenState
               decoration: InputDecoration(
                 labelText: 'Hari ke- (1-300)',
                 errorText: _serverFieldErrors?['dayNumber'],
+                prefixIcon: const Icon(
+                  Icons.calendar_month_rounded,
+                  color: AppColors.gold,
+                ),
               ),
               validator: (value) {
                 final parsed = int.tryParse(value?.trim() ?? '');
@@ -139,8 +143,13 @@ class _DailyTargetFormScreenState
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            Text('Posisi awal', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 20),
+            const SectionHeader(
+              icon: Icons.flag_circle_rounded,
+              title: 'Posisi awal',
+              color: AppColors.deepGreen,
+            ),
+            const SizedBox(height: 10),
             SurahVerseSelector(
               surahs: surahs,
               surahNumber: _startSurah,
@@ -154,8 +163,13 @@ class _DailyTargetFormScreenState
               }),
               onVerseChanged: (value) => setState(() => _startVerse = value),
             ),
-            const SizedBox(height: 16),
-            Text('Posisi akhir', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 20),
+            const SectionHeader(
+              icon: Icons.sports_score_rounded,
+              title: 'Posisi akhir',
+              color: AppColors.navy,
+            ),
+            const SizedBox(height: 10),
             SurahVerseSelector(
               surahs: surahs,
               surahNumber: _endSurah,

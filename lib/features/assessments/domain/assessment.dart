@@ -45,6 +45,12 @@ class MemorizationAssessment {
   final int? targetEndSurahNumber;
   final int? targetEndVerseNumber;
   final TargetStatus targetStatus;
+  /// Linear verse count (from surah 1 verse 1) of this assessment's end
+  /// position, for charting achievement over time.
+  final int achievedCumulativeVerses;
+  /// Same linear measure for the daily target's end position, or null when
+  /// there's no target data for this assessment's day.
+  final int? targetCumulativeVerses;
 
   const MemorizationAssessment({
     required this.id,
@@ -62,6 +68,8 @@ class MemorizationAssessment {
     required this.targetEndSurahNumber,
     required this.targetEndVerseNumber,
     required this.targetStatus,
+    required this.achievedCumulativeVerses,
+    required this.targetCumulativeVerses,
   });
 
   factory MemorizationAssessment.fromJson(Map<String, dynamic> json) =>
@@ -81,5 +89,7 @@ class MemorizationAssessment {
         targetEndSurahNumber: json['targetEndSurahNumber'] as int?,
         targetEndVerseNumber: json['targetEndVerseNumber'] as int?,
         targetStatus: targetStatusFromApi(json['targetStatus'] as String),
+        achievedCumulativeVerses: json['achievedCumulativeVerses'] as int,
+        targetCumulativeVerses: json['targetCumulativeVerses'] as int?,
       );
 }

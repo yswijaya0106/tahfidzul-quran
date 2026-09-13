@@ -38,19 +38,43 @@ class HomeShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) =>
-            shell.goBranch(index, initialLocation: index == shell.currentIndex),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: AppColors.goldLight.withValues(alpha: 0.55),
-        destinations: List.generate(
-          _labels.length,
-          (i) => NavigationDestination(
-            icon: Icon(_icons[i]),
-            selectedIcon: Icon(_selectedIcons[i]),
-            label: _labels[i],
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.deepGreen
+                  : Colors.grey.shade600,
+            ),
+          ),
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => TextStyle(
+              fontSize: 12,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.deepGreen
+                  : Colors.grey.shade600,
+            ),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: shell.currentIndex,
+          onDestinationSelected: (index) => shell.goBranch(
+            index,
+            initialLocation: index == shell.currentIndex,
+          ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: AppColors.goldLight.withValues(alpha: 0.55),
+          destinations: List.generate(
+            _labels.length,
+            (i) => NavigationDestination(
+              icon: Icon(_icons[i]),
+              selectedIcon: Icon(_selectedIcons[i]),
+              label: _labels[i],
+            ),
           ),
         ),
       ),

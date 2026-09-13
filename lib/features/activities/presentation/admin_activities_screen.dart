@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../locations/application/location_providers.dart';
 import '../../locations/domain/location.dart';
 import '../application/activity_providers.dart';
 import '../domain/activity.dart';
 import '../domain/activity_photo.dart';
+
+const _rowColors = [
+  AppColors.deepGreen,
+  AppColors.gold,
+  AppColors.navy,
+  AppColors.maroon,
+];
 
 /// "Kegiatan" tab: every Rumah Tahfidz, collapsed by default. Expanding one
 /// fetches its activities (and photos, per activity) only at that point, so
@@ -37,8 +45,10 @@ class AdminActivitiesScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             itemCount: result.data.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, index) =>
-                _LocationActivitiesTile(location: result.data[index]),
+            itemBuilder: (context, index) => _LocationActivitiesTile(
+              location: result.data[index],
+              iconColor: _rowColors[index % _rowColors.length],
+            ),
           ),
         ),
       ),
@@ -48,8 +58,12 @@ class AdminActivitiesScreen extends ConsumerWidget {
 
 class _LocationActivitiesTile extends StatefulWidget {
   final TahfidzLocation location;
+  final Color iconColor;
 
-  const _LocationActivitiesTile({required this.location});
+  const _LocationActivitiesTile({
+    required this.location,
+    required this.iconColor,
+  });
 
   @override
   State<_LocationActivitiesTile> createState() =>
@@ -61,18 +75,19 @@ class _LocationActivitiesTileState extends State<_LocationActivitiesTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           ListTile(
-            leading: CircleAvatar(
-              backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-              child: const Icon(
-                Icons.mosque_outlined,
-                color: AppColors.deepGreen,
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: widget.iconColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
+              child: Icon(Icons.mosque_outlined, color: widget.iconColor),
             ),
             title: Text(
               widget.location.name,

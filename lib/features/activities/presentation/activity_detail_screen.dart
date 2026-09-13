@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/activity_providers.dart';
 import '../domain/activity.dart';
@@ -30,13 +33,15 @@ class ActivityDetailScreen extends ConsumerWidget {
           data: (context, activityData) => ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _ActivityHeader(activity: activityData),
-              const Divider(height: 32),
-              Text(
-                'Foto Kegiatan',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+              AppCard(
+                padding: const EdgeInsets.all(16),
+                child: _ActivityHeader(activity: activityData),
+              ),
+              const SizedBox(height: 24),
+              const SectionHeader(
+                icon: Icons.photo_library_rounded,
+                title: 'Foto Kegiatan',
+                color: AppColors.gold,
               ),
               const SizedBox(height: 12),
               AsyncValueView(
@@ -44,7 +49,10 @@ class ActivityDetailScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(activityPhotosProvider(activityId)),
                 isEmpty: (result) => result.isEmpty,
                 empty: (_) => const Text('Belum ada foto untuk kegiatan ini.'),
-                data: (context, result) => _ActivityPhotoGrid(photos: result),
+                data: (context, result) => AppCard(
+                  padding: const EdgeInsets.all(12),
+                  child: _ActivityPhotoGrid(photos: result),
+                ),
               ),
             ],
           ),
@@ -77,7 +85,11 @@ class _ActivityHeader extends ConsumerWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(Icons.calendar_today_rounded, size: 16),
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 16,
+              color: AppColors.navy,
+            ),
             const SizedBox(width: 6),
             Text(activity.activityDate),
           ],
@@ -86,7 +98,11 @@ class _ActivityHeader extends ConsumerWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.mosque_outlined, size: 16),
+              const Icon(
+                Icons.mosque_outlined,
+                size: 16,
+                color: AppColors.maroon,
+              ),
               const SizedBox(width: 6),
               Expanded(child: Text(location.addressLine)),
             ],

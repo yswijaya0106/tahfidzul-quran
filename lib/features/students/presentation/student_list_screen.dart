@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../locations/application/location_providers.dart';
 import '../application/student_providers.dart';
@@ -65,9 +66,9 @@ class _StudentListScreenState extends ConsumerState<StudentListScreen> {
                 empty: (_) =>
                     const Center(child: Text('Belum ada siswa ditemukan.')),
                 data: (context, result) => ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   itemCount: result.data.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) =>
                       _StudentTile(student: result.data[index]),
                 ),
@@ -87,12 +88,53 @@ class _StudentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      minVerticalPadding: 16,
-      title: Text(student.fullName),
-      subtitle: Text(student.studentCode),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push('/students/${student.id}'),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          minVerticalPadding: 16,
+          leading: _StudentAvatar(photoUrl: student.studentPhotoUrl),
+          title: Text(
+            student.fullName,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(student.studentCode),
+          trailing: const Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.deepGreen,
+          ),
+          onTap: () => context.push('/students/${student.id}'),
+        ),
+      ),
+    );
+  }
+}
+
+class _StudentAvatar extends StatelessWidget {
+  final String? photoUrl;
+
+  const _StudentAvatar({required this.photoUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = this.photoUrl;
+    return CircleAvatar(
+      backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+      onBackgroundImageError: photoUrl != null ? (_, _) {} : null,
+      child: photoUrl == null ? const Icon(Icons.person_outline) : null,
     );
   }
 }

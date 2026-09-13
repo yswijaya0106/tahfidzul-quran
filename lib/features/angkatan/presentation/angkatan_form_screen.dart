@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/error/app_exception.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_card.dart';
 import '../application/angkatan_providers.dart';
 import '../domain/angkatan.dart';
 
@@ -130,19 +132,34 @@ class _AngkatanFormScreenState extends ConsumerState<AngkatanFormScreen> {
                     : null,
               ),
               const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Tanggal mulai'),
-                subtitle: Text(_formatDate(_startDate)),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _submitting ? null : () => _pickDate(isStart: true),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Tanggal selesai'),
-                subtitle: Text(_formatDate(_endDate)),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _submitting ? null : () => _pickDate(isStart: false),
+              AppCard(
+                padding: EdgeInsets.zero,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Column(
+                    children: [
+                      AppIconTile(
+                        icon: Icons.event_rounded,
+                        iconColor: AppColors.deepGreen,
+                        title: 'Tanggal mulai',
+                        subtitle: _formatDate(_startDate),
+                        onTap: _submitting
+                            ? null
+                            : () => _pickDate(isStart: true),
+                      ),
+                      const Divider(height: 1, indent: 68),
+                      AppIconTile(
+                        icon: Icons.event_available_rounded,
+                        iconColor: AppColors.gold,
+                        title: 'Tanggal selesai',
+                        subtitle: _formatDate(_endDate),
+                        onTap: _submitting
+                            ? null
+                            : () => _pickDate(isStart: false),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               if (_serverFieldErrors?['endDate'] != null) ...[
                 const SizedBox(height: 4),

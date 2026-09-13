@@ -47,6 +47,7 @@ class StudentRepository {
     String? address,
     String? studentPhone,
     String? guardianPhone,
+    String? studentPhotoObjectKey,
   }) async {
     final response = await _apiClient.post(
       '/students',
@@ -59,7 +60,19 @@ class StudentRepository {
         'address': ?address,
         'studentPhone': ?studentPhone,
         'guardianPhone': ?guardianPhone,
+        'studentPhotoObjectKey': ?studentPhotoObjectKey,
       },
+    );
+    return Student.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  Future<Student> updatePhoto({
+    required String id,
+    required String studentPhotoObjectKey,
+  }) async {
+    final response = await _apiClient.patch(
+      '/students/$id',
+      data: {'studentPhotoObjectKey': studentPhotoObjectKey},
     );
     return Student.fromJson(response['data'] as Map<String, dynamic>);
   }

@@ -31,6 +31,20 @@ class DashboardRepository {
     );
   }
 
+  Future<LeaderboardOverview> getLeaderboard({
+    required LeaderboardScope scope,
+    String? date,
+  }) async {
+    final response = await _apiClient.get(
+      '/dashboard/leaderboard',
+      query: {
+        'scope': leaderboardScopeToApi(scope),
+        if (date != null) 'date': date,
+      },
+    );
+    return LeaderboardOverview.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
   Future<TodayActivityPhotosOverview> getTodayActivityPhotos({String? date}) async {
     final response = await _apiClient.get(
       '/dashboard/today-activity-photos',

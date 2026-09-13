@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
+import '../constants/app_constants.dart';
 import '../error/app_exception.dart';
 import '../storage/secure_token_storage.dart';
 import 'app_config.dart';
+import 'interceptors/debug_api_interceptor.dart';
 
 /// Thin wrapper around Dio that injects the access token, transparently
 /// retries once after a refresh on 401, and normalizes every failure into
@@ -47,6 +49,9 @@ class ApiClient {
         },
       ),
     );
+    if (AppConstants.isDebugMode) {
+      _dio.interceptors.add(DebugApiInterceptor());
+    }
   }
 
   Future<bool> _refreshTokens() async {

@@ -14,3 +14,18 @@ final assessmentHistoryProvider = FutureProvider.autoDispose
       (ref, studentId) =>
           ref.watch(assessmentRepositoryProvider).listForStudent(studentId),
     );
+
+/// Full new-memorization history for a student's achievement chart, oldest
+/// first. Fetches the max page size in one request rather than paginating —
+/// the 300-day program bounds how much history there can ever be.
+final assessmentChartHistoryProvider = FutureProvider.autoDispose
+    .family<List<MemorizationAssessment>, String>((ref, studentId) async {
+      final page = await ref
+          .watch(assessmentRepositoryProvider)
+          .listForStudent(
+            studentId,
+            pageSize: 100,
+            assessmentType: AssessmentType.newMemorization,
+          );
+      return page.data.reversed.toList();
+    });
