@@ -363,7 +363,10 @@ class _LocationProgressRow extends ConsumerWidget {
     return InkWell(
       onTap: () {
         ref.read(selectedLocationIdProvider.notifier).state = item.locationId;
-        context.go('/dashboard');
+        // push, not go: go() replaces the whole navigation stack, leaving
+        // no page to pop back to — the hardware back button would close
+        // the app instead of returning here to the admin dashboard.
+        context.push('/dashboard');
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

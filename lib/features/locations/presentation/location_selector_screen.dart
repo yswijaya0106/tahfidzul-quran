@@ -208,7 +208,11 @@ class _LocationTile extends ConsumerWidget {
           ),
           onTap: () {
             ref.read(selectedLocationIdProvider.notifier).state = location.id;
-            context.go(redirectPath);
+            // push, not go: go() replaces the whole navigation stack, so an
+            // admin arriving here from /admin/home would have no page left
+            // to pop back to — the hardware back button would close the app
+            // instead of returning to the admin dashboard.
+            context.push(redirectPath);
           },
         ),
       ),
