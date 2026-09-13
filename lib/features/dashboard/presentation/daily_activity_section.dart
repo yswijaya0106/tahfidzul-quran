@@ -42,7 +42,6 @@ class _DailyActivitySectionState extends ConsumerState<DailyActivitySection> {
       initialDate: _selectedDate,
       firstDate: DateTime(2024, 1, 1),
       lastDate: DateTime.now(),
-      locale: const Locale('id', 'ID'),
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
