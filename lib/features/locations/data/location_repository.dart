@@ -26,10 +26,17 @@ class LocationRepository {
   Future<TahfidzLocation> create({
     required String name,
     required String address,
+    String? provinsi,
+    String? kabKota,
+    String? kecamatan,
+    String? kodePos,
+    int? provinceId,
+    int? cityId,
     double? latitude,
     double? longitude,
     String? phone,
     String? description,
+    String? coverPhotoObjectKey,
     List<LocationOrganizationMember>? organizationMembers,
   }) async {
     final response = await _apiClient.post(
@@ -37,11 +44,18 @@ class LocationRepository {
       data: {
         'name': name,
         'address': address,
+        if (provinsi != null && provinsi.isNotEmpty) 'provinsi': provinsi,
+        if (kabKota != null && kabKota.isNotEmpty) 'kabKota': kabKota,
+        if (kecamatan != null && kecamatan.isNotEmpty) 'kecamatan': kecamatan,
+        if (kodePos != null && kodePos.isNotEmpty) 'kodePos': kodePos,
+        'provinceId': ?provinceId,
+        'cityId': ?cityId,
         'latitude': ?latitude,
         'longitude': ?longitude,
         if (phone != null && phone.isNotEmpty) 'phone': phone,
         if (description != null && description.isNotEmpty)
           'description': description,
+        if (coverPhotoObjectKey != null) 'coverPhotoObjectKey': coverPhotoObjectKey,
         if (organizationMembers != null)
           'organizationMembers': organizationMembers
               .map(_memberToJson)
@@ -55,10 +69,17 @@ class LocationRepository {
     String id, {
     String? name,
     String? address,
+    String? provinsi,
+    String? kabKota,
+    String? kecamatan,
+    String? kodePos,
+    int? provinceId,
+    int? cityId,
     double? latitude,
     double? longitude,
     String? phone,
     String? description,
+    String? coverPhotoObjectKey,
     LocationStatus? status,
     List<LocationOrganizationMember>? organizationMembers,
   }) async {
@@ -67,10 +88,17 @@ class LocationRepository {
       data: {
         'name': ?name,
         'address': ?address,
+        'provinsi': ?provinsi,
+        'kabKota': ?kabKota,
+        'kecamatan': ?kecamatan,
+        'kodePos': ?kodePos,
+        'provinceId': ?provinceId,
+        'cityId': ?cityId,
         'latitude': ?latitude,
         'longitude': ?longitude,
         'phone': ?phone,
         'description': ?description,
+        'coverPhotoObjectKey': ?coverPhotoObjectKey,
         if (status != null)
           'status': status == LocationStatus.active ? 'ACTIVE' : 'INACTIVE',
         if (organizationMembers != null)

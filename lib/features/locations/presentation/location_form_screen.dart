@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/error/app_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../ref_data/application/ref_data_providers.dart';
 import '../application/location_providers.dart';
 import '../domain/location.dart';
+import 'address_search_field.dart';
+import 'location_cover_photo_field.dart';
 
 /// Create/edit form for a Tahfidz location. Pass [location] to edit an
 /// existing one (also enables the archive action); omit it to create new.
@@ -39,12 +42,32 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
   late final _longitudeController = TextEditingController(
     text: widget.location?.longitude?.toString(),
   );
+  late final _kecamatanController = TextEditingController(
+    text: widget.location?.kecamatan,
+  );
+  late final _kodePosController = TextEditingController(
+    text: widget.location?.kodePos,
+  );
+
+  int? _provinceId;
+  int? _cityId;
+  String? _coverPhotoObjectKey;
+  String? _coverPhotoUrl;
 
   final List<_MemberEntry> _members = [];
   bool _membersLoaded = false;
 
   bool _submitting = false;
   Map<String, String>? _serverFieldErrors;
+
+  @override
+  void initState() {
+    super.initState();
+    _provinceId = widget.location?.provinceId;
+    _cityId = widget.location?.cityId;
+    _coverPhotoObjectKey = widget.location?.coverPhotoObjectKey;
+    _coverPhotoUrl = widget.location?.coverPhotoUrl;
+  }
 
   bool get _isEditing => widget.location != null;
 
@@ -56,6 +79,8 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
     _descriptionController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
+    _kecamatanController.dispose();
+    _kodePosController.dispose();
     for (final member in _members) {
       member.dispose();
     }
@@ -101,10 +126,15 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
           widget.location!.id,
           name: _nameController.text.trim(),
           address: _addressController.text.trim(),
+          kecamatan: _kecamatanController.text.trim(),
+          kodePos: _kodePosController.text.trim(),
+          provinceId: _provinceId,
+          cityId: _cityId,
           latitude: latitude,
           longitude: longitude,
           phone: _phoneController.text.trim(),
           description: _descriptionController.text.trim(),
+          coverPhotoObjectKey: _coverPhotoObjectKey,
           organizationMembers: organizationMembers,
         );
         ref.invalidate(locationDetailProvider(widget.location!.id));
@@ -112,10 +142,15 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
         await repository.create(
           name: _nameController.text.trim(),
           address: _addressController.text.trim(),
+          kecamatan: _kecamatanController.text.trim(),
+          kodePos: _kodePosController.text.trim(),
+          provinceId: _provinceId,
+          cityId: _cityId,
           latitude: latitude,
           longitude: longitude,
           phone: _phoneController.text.trim(),
           description: _descriptionController.text.trim(),
+          coverPhotoObjectKey: _coverPhotoObjectKey,
           organizationMembers: organizationMembers,
         );
       }
@@ -204,6 +239,14 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              LocationCoverPhotoField(
+                photoUrl: _coverPhotoUrl,
+                onUploaded: (uploaded) => setState(() {
+                  _coverPhotoObjectKey = uploaded.objectKey;
+                  _coverPhotoUrl = null; // show the fresh local preview, not the stale signed URL
+                }),
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -219,6 +262,20 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                     : null,
               ),
               const SizedBox(height: 16),
+              AddressSearchField(
+                onSelected: (result) => setState(() {
+                  _addressController.text = result.displayName;
+                  _latitudeController.text = result.latitude.toString();
+                  _longitudeController.text = result.longitude.toString();
+                  if (result.kecamatan != null) {
+                    _kecamatanController.text = result.kecamatan!;
+                  }
+                  if (result.kodePos != null) {
+                    _kodePosController.text = result.kodePos!;
+                  }
+                }),
+              ),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _addressController,
                 decoration: InputDecoration(
@@ -233,6 +290,34 @@ class _LocationFormScreenState extends ConsumerState<LocationFormScreen> {
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? 'Wajib diisi'
                     : null,
+              ),
+              const SizedBox(height: 16),
+              _ProvinceCityFields(
+                initialProvinceId: _provinceId,
+                initialCityId: _cityId,
+                onChanged: (provinceId, cityId) => setState(() {
+                  _provinceId = provinceId;
+                  _cityId = cityId;
+                }),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _kecamatanController,
+                      decoration: const InputDecoration(labelText: 'Kecamatan (opsional)'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _kodePosController,
+                      decoration: const InputDecoration(labelText: 'Kode pos (opsional)'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -441,6 +526,127 @@ class _MemberFormRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Cascading province/city dropdowns backed by ref_province/ref_city.
+/// Picking a province resets the city (its options depend on the province).
+class _ProvinceCityFields extends ConsumerStatefulWidget {
+  final int? initialProvinceId;
+  final int? initialCityId;
+  final void Function(int? provinceId, int? cityId) onChanged;
+
+  const _ProvinceCityFields({
+    required this.initialProvinceId,
+    required this.initialCityId,
+    required this.onChanged,
+  });
+
+  @override
+  ConsumerState<_ProvinceCityFields> createState() => _ProvinceCityFieldsState();
+}
+
+class _ProvinceCityFieldsState extends ConsumerState<_ProvinceCityFields> {
+  late int? _provinceId = widget.initialProvinceId;
+  late int? _cityId = widget.initialCityId;
+
+  @override
+  Widget build(BuildContext context) {
+    final provinces = ref.watch(provincesProvider);
+    final cities = ref.watch(citiesProvider(_provinceId));
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: provinces.when(
+            data: (list) => DropdownButtonFormField<int>(
+              initialValue: _provinceId,
+              decoration: const InputDecoration(labelText: 'Provinsi (opsional)'),
+              isExpanded: true,
+              items: [
+                const DropdownMenuItem(value: null, child: Text('Pilih provinsi')),
+                for (final province in list)
+                  DropdownMenuItem(
+                    value: province.id,
+                    child: Text(
+                      province.provinceName ?? '-',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _provinceId = value;
+                  _cityId = null;
+                });
+                widget.onChanged(_provinceId, _cityId);
+              },
+            ),
+            loading: () => const _DropdownPlaceholder(label: 'Provinsi'),
+            error: (_, _) => const _DropdownPlaceholder(label: 'Provinsi', hasError: true),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _provinceId == null
+              ? const _DropdownPlaceholder(label: 'Kabupaten/Kota', enabled: false)
+              : cities.when(
+                  data: (list) => DropdownButtonFormField<int>(
+                    initialValue: list.any((c) => c.id == _cityId) ? _cityId : null,
+                    decoration: const InputDecoration(labelText: 'Kabupaten/Kota (opsional)'),
+                    isExpanded: true,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('Pilih kota')),
+                      for (final city in list)
+                        DropdownMenuItem(
+                          value: city.id,
+                          child: Text(city.cityName ?? '-', overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _cityId = value);
+                      widget.onChanged(_provinceId, _cityId);
+                    },
+                  ),
+                  loading: () => const _DropdownPlaceholder(label: 'Kabupaten/Kota'),
+                  error: (_, _) =>
+                      const _DropdownPlaceholder(label: 'Kabupaten/Kota', hasError: true),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DropdownPlaceholder extends StatelessWidget {
+  final String label;
+  final bool enabled;
+  final bool hasError;
+
+  const _DropdownPlaceholder({required this.label, this.enabled = true, this.hasError = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<int>(
+      initialValue: null,
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: hasError ? 'Gagal memuat' : null,
+        suffixIcon: enabled && !hasError
+            ? const Padding(
+                padding: EdgeInsets.all(12),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            : null,
+      ),
+      items: const [],
+      onChanged: null,
     );
   }
 }
