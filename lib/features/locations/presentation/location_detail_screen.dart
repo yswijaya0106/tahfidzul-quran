@@ -7,6 +7,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_header.dart';
 import '../application/location_providers.dart';
 import '../domain/location.dart';
+import 'google_maps_launcher.dart';
 
 const List<Color> _memberColors = [
   AppColors.deepGreen,
@@ -56,12 +57,23 @@ class _LocationDetailBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                location.name,
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      location.name,
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.map_outlined, color: AppColors.navy),
+                    tooltip: 'Buka di Google Maps',
+                    onPressed: () => openLocationInGoogleMaps(context, location),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
               Text(location.addressLine),
               if (location.phone != null && location.phone!.isNotEmpty) ...[
                 const SizedBox(height: 8),

@@ -11,6 +11,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/user.dart';
 import '../application/location_providers.dart';
 import '../domain/location.dart';
+import 'google_maps_launcher.dart';
 
 const List<Color> _locationColors = [
   AppColors.deepGreen,
@@ -186,6 +187,11 @@ class _LocationTile extends ConsumerWidget {
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
+              IconButton(
+                icon: const Icon(Icons.map_outlined),
+                tooltip: 'Buka di Google Maps',
+                onPressed: () => openLocationInGoogleMaps(context, location),
+              ),
               IconButton(
                 icon: const Icon(Icons.info_outline),
                 tooltip: 'Struktur organisasi',
